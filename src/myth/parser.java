@@ -54,16 +54,16 @@ class Address {
 // After Parser's first pas create list of Snapshots with Future
 // references or Literals for second re-evaluation.
 class Snapshot {
-	int     pc;
-	String  op;
-	Address adr;
+    int     pc;
+    String  op;
+    Address adr;
     boolean futureRef; // if false a-part is literal
-	Snapshot( int pc, String op, Address adr, boolean futureRef ){
-		this.pc        = pc;
-		this.op        = op;
-		this.adr      = adr;
+    Snapshot( int pc, String op, Address adr, boolean futureRef ){
+        this.pc        = pc;
+        this.op        = op;
+        this.adr      = adr;
         this.futureRef = futureRef;
-	}
+    }
     @Override
     public String toString() {
         return pc + ":" + op + "," + adr.toString() + "|" + futureRef;
@@ -241,7 +241,7 @@ class Parser { /////////////////////////////////////////////////
                 val = mostRecent;
             } else {
                 if(! tab.containsKey( tok.value )){ // SAMBO
-                	// Ok Future Reference / Literal Constant
+                    // Ok Future Reference / Literal Constant
                     throw new Exception( tok.toString());
                 }
                 val = tab.get( tok.value );
@@ -333,19 +333,19 @@ class Parser { /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     Word evalWalue( String walue ){
         Word w = new Word( false, 0 );
-    	try {
-    		for( final var walueComp: Word.walueSplit( walue )){
+        try {
+            for( final var walueComp: Word.walueSplit( walue )){
                 // Here walueComp is an <E,F> pair.
-    			int F = eval( Espresso.Analyze( walueComp.y ));
-    			if(! checkField( F )){
-    				throw new Error( "Not valid field" );
-    			}
-    			int E = eval( Espresso.Analyze( walueComp.x ));
-    			w.setvalue( F, E ); 
-    		}
-    	} catch (Exception e ) {
-    		throw new Error( "Alarm!" );
-    	}
+                int F = eval( Espresso.Analyze( walueComp.y ));
+                if(! checkField( F )){
+                    throw new Error( "Not valid field" );
+                }
+                int E = eval( Espresso.Analyze( walueComp.x ));
+                w.setvalue( F, E ); 
+            }
+        } catch (Exception e ) {
+            throw new Error( "Alarm!" );
+        }
         return w;
     }
     ////////////////////////////////////////////////////////////
@@ -372,16 +372,16 @@ class Parser { /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     int isFutureRef( String a ){
         if( a.isEmpty()) return 0;
-    	final var coffee = Espresso.Analyze( a );
-    	int val = Integer.MAX_VALUE;
-    	try {
-    		val = eval( coffee );
-    	} catch ( Exception e ){
-    		if( coffee.size() > 1 ){
-    			throw new Error( "Future Reference" );
-    		}
-    	}
-    	return val;
+        final var coffee = Espresso.Analyze( a );
+        int val = Integer.MAX_VALUE;
+        try {
+            val = eval( coffee );
+        } catch ( Exception e ){
+            if( coffee.size() > 1 ){
+                throw new Error( "Future Reference" );
+            }
+        }
+        return val;
     }
     ////////////////////////////////////////////////////////////
     // called by firstPass
@@ -479,31 +479,31 @@ class Parser { /////////////////////////////////////////////////
                 switch( checkOp( line.op )) {
                 case MIX:
                     asm( line.op, new Address( line.adr ));
-                	break;
+                    break;
                 case EQU:
                     w = evalWalue( line.adr );
                     tab.put( line.loc, w.getfld( 0, Word.BYTES ));
                     pc--;
-                	break;
+                    break;
                 case ORIG:
                     w = evalWalue( line.adr );
                     pc = w.getfld( 0, Word.BYTES ) - 1;
-                	break;
+                    break;
                 case CON:
                     w = evalWalue( line.adr );
                     vm.memory[ pc ] = w;
-                	break;
+                    break;
                 case ALF:
                     // log: allow spaces to appear in line.adr
                     encode( line.adr );
-                	break;
+                    break;
                 case END:
                     vm.end = pc;
-                	break;
+                    break;
                 case NOPE:
                     throw new Error( "8/" );
-				default:
-                    break;	
+                default:
+                    break;  
                 }
             }
             pc++;
@@ -588,13 +588,13 @@ class Parser { /////////////////////////////////////////////////
         for( int j = 0; j < DIGITS; j++ ){
             Collections.sort( lab[ j ]);
         }
-    	for( final Snapshot snapshot: timeshift ) {
-    		if( snapshot.futureRef == false ) {
-    			asmli( snapshot );
-    		} else {
+        for( final Snapshot snapshot: timeshift ) {
+            if( snapshot.futureRef == false ) {
+                asmli( snapshot );
+            } else {
                 asmfr( snapshot );
-    		}
-    	}
+            }
+        }
     }
 ////////////////////////////////////////////////////////////////
     public static void main( String[] args ) throws Exception {
