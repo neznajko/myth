@@ -110,6 +110,10 @@ class Word {
         n *= BYTESIZ;
         bufr <<= n;
     }
+    void shiftryte( int n ){
+        n *= BYTESIZ;
+        bufr >>= n;
+    }
     void div( long d ){
         bufr /= d;
     }
@@ -148,18 +152,67 @@ class Word {
     ///////_////////////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
-        out.println( walueSplit( "3-1/2+1(4:1),18(0:2),3(1:1)" ));
+        Word w = new Word( false , 0 );
+        w.setvalue( 2, -10 );
+        out.println( w );
+        w.shiftryte( 1 );
+        out.println( w );
     }                     
 }
 ////////////////////////////////////////////////////////////////////////
+// Ok, now we have a memory with instructions,( and data ) first we want
+// to decode the instruction
+class InsWord { // Instruction Word
+    int adr;
+    int idx;
+    int fld;
+    int cde;
+    InsWord( final Word w ){
+        adr = w.getfld( 0, 2 );
+        idx = w.getfld( 3, 3 );
+        fld = w.getfld( 4, 4 );
+        cde = w.getfld( 5, 5 );
+    }
+    @Override
+    public String toString() {
+        return( "(" +
+                adr + "," +
+                idx + "," +
+                fld + "," +
+                cde + ")" );
+    }
+}
+////////////////////////////////////////////////////////////////
+// +-----+-----+-----+-----+-----+-----+
+// |        A        |  i  |  f  |  C  |
+// |                 |     |     |     |
+// +-----+-----+-----+-----+-----+-----+
+//    0     1     2     3     4     5
+// 
+// +---+---+
+// | A | X |
+// +---+---+
+//
+////////////////////////////////////////////////////////////////////////
 class VM { // Virtual Machine
     static final int MEMSIZ = 100; // number of words
+    static final int NIDX   = 6;   // nof index registers
     Word memory[] = new Word[ MEMSIZ ]; // per sé( wtf? )
     int end = 5; // vhere to insert literals
+    Word rA;
+    Word rX;
+    Word rI[] = new Word[ NIDX ];
+    Operator op;
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){
             memory[j] = new Word( false, 0 );
         }
+        rA = new Word( false, 0 );
+        rX = new Word( false, 0 );
+        for( int j = 0; j < NIDX; j++ ){
+            rI[j] = new Word( false, 0 );
+        }
+        op = new Operator( this );
     }
     // Dump memory in the address interval [ lo, hi ), for dumping all
     // memory use [ 0, MEMSIZ ) range.
@@ -177,7 +230,10 @@ class VM { // Virtual Machine
         var word = vm.memory[5];
         word.setvalue( Word.F( 1, 4 ), 15 );
         vm.dumpMemory(0, 10);
+        var insWord = new InsWord( word );
+        out.println( insWord );
     }
 }
 ////////////////////////////////////////////////////////////////////////
 // log:
+//
