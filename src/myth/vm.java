@@ -202,6 +202,7 @@ class VM { // Virtual Machine
     Word rA;
     Word rX;
     Word rI[] = new Word[ NIDX ];
+    Word rJ;
     Operator op;
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){
@@ -212,6 +213,7 @@ class VM { // Virtual Machine
         for( int j = 0; j < NIDX; j++ ){
             rI[j] = new Word( false, 0 );
         }
+        rJ = new Word( false, 0 );
         op = new Operator( this );
     }
     // Dump memory in the address interval [ lo, hi ), for dumping all
