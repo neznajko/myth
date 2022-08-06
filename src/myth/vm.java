@@ -117,6 +117,58 @@ class Word {
     void div( long d ){
         bufr /= d;
     }
+    long getval() {
+        long val = bufr;
+        if( sign ) val = -val;
+        return val;
+    }
+    static boolean overflow( long value ){
+        // f - nibble
+        // ff - byte
+        // ffff - short
+        // ffff ffff - int
+        // ffff ffff ffff ffff - long
+        // 0000 0000 3fff ffff - maximum value ( 30 bits )
+        // ffff ffff c000 0000 - overflow mask
+        return ( value & 0xffffffffc0000000L ) > 0;
+    }
+    void inc( final Word w ) throws Exception {
+        long res = getval() + w.getval();
+        if( overflow( res )){
+            throw new Exception( "Overflow" );
+        }
+        sign = res < 0;
+        if( sign ) res = -res;
+        bufr = res;
+    }
+    void mul( final Word w ) throws Exception {
+        long res = getval() * w.getval();
+        // Here we have to check if there is an overflow over the 60th
+        // bit.
+        if(( res & 0xc000000000000000L ) > 0 ){
+            throw new Exception( "Overflow" );
+        }
+        sign = res < 0;
+        if( sign ) res = -res;
+        bufr = res;
+    }
+    // Return the reminder, and replace with the quotent.
+    long div( final Word w ) throws Exception {
+        // prologue,( provide the actors )
+        long x = getval();   // divident
+        long y = w.getval(); // divisor
+        // action
+        long q = Math.floorDiv( x, y ); // quotent
+        if( overflow( q )){
+            throw new Exception( "Overflow" );
+        }
+        long r = Math.floorMod( x, y ); // remainder
+        // epilogue
+        sign = q < 0;
+        if( sign ) q = -q;
+        bufr = q;
+        return r;
+    }
     ////////////////////////////////////////////////////////////////////
     // Check W-Value Component E1(F1),[E2(F2)],...,EN(FN)
     static Pair<String,String> checkWalueComp( String walueComp ){
@@ -153,10 +205,20 @@ class Word {
     public static void main( String[] args ){
         out.println( "Word" );
         Word w = new Word( false , 0 );
-        w.setvalue( 2, -10 );
+        w.setvalue( 2, -15 );
         out.println( w );
         w.shiftryte( 1 );
         out.println( w );
+        Word x = new Word( false, 0 );
+        x.setvalue( 45, 63 );
+        out.println( x );
+        try {
+            long r = w.div( x );
+            out.println( w );
+            out.println( r );
+        } catch( Exception e ){
+            out.println( e );
+        }
     }                     
 }
 ////////////////////////////////////////////////////////////////////////
@@ -203,6 +265,7 @@ class VM { // Virtual Machine
     Word rX;
     Word rI[] = new Word[ NIDX ];
     Word rJ;
+    boolean overflowToggle;
     Operator op;
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){
@@ -214,6 +277,7 @@ class VM { // Virtual Machine
             rI[j] = new Word( false, 0 );
         }
         rJ = new Word( false, 0 );
+        overflowToggle = false;
         op = new Operator( this );
     }
     // Dump memory in the address interval [ lo, hi ), for dumping all
@@ -237,5 +301,3 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////////////
-// log:
-//

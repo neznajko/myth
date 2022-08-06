@@ -10,8 +10,8 @@ class Operator {
         void exec( int adr, int fld );
     }
     // loading...
-    void load( int adr, int fld, Word reg ) {
-        Word w = vm.memory[adr];
+    void load( int adr, int fld, Word reg ){
+        Word w = vm.memory[ adr ];
         int left = Word.L( fld );
         int ryte = Word.R( fld );
         int val = w.getfld( left, ryte );
@@ -175,7 +175,71 @@ class Operator {
             store( adr, 5, new Word( false, 0 ));
         }
     }
-    ////////////////////////////////////////////////////////////    
+    ////////////////////////////////////////////////////////////
+    class ADD implements Service {
+        public void exec( int adr, int fld ){
+            Word w = new Word( false, 0 );
+            load( adr, fld, w );
+            //
+            try {
+                vm.rA.inc( w );
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    class SUB implements Service {
+        public void exec( int adr, int fld ){
+            Word w = new Word( false, 0 );
+            load( adr, fld, w );
+            w.sign = !w.sign; // flip the switch
+            try {
+                vm.rA.inc( w );
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    // rAX, both signs
+    class MUL implements Service {
+        public void exec( int adr, int fld ){
+            Word w = new Word( false, 0 );
+            load( adr, fld, w );
+            try {
+                vm.rA.mul( w );
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+            // copy first 30 bits to rX, copy sign as well.
+            vm.rX.bufr = vm.rA.bufr & 0x000000003fffffffL;
+            vm.rX.sign = vm.rA.sign;
+            // shift ryte rA
+            vm.rA.shiftryte( 5 );
+        }
+    }
+    // --------------------------------------------------------- ___
+    // Here I'm differ from the spec, after thus in rA is the fl oör
+    // of the division and in rX is the mod with their respectiv è__
+    // signs.                                                    ___
+    // --------------------------------------------------------- ___
+    class DIV implements Service {
+        public void exec( int adr, int fld ){
+            Word w = new Word( false, 0 );
+            load( adr, fld, w );
+            // first of ll put rAX into rA buffer
+            vm.rA.shiftleft( 5 ); // fai
+            vm.rA.bufr |= vm.rX.bufr;
+            // Ok, ??!
+            try {
+                int mod = (int) vm.rA.div( w );
+                vm.rX.setvalue( 5, mod ); // fäj
+            } catch( Exception e ){
+                // log: leave rAX as it is for now
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////
     Service serv[] = new Service[ NO_SERVICES ];
     Operator( VM vm ){
         this.vm = vm;
@@ -205,6 +269,10 @@ class Operator {
         serv[ 30 ] = new ST6();
         serv[ 32 ] = new STJ();
         serv[ 33 ] = new STZ();
+        serv[  1 ] = new ADD();
+        serv[  2 ] = new SUB();
+        serv[  3 ] = new MUL();
+        serv[  4 ] = new DIV();
     }
     void exec( int adr, int fld, int code ){
         serv[ code ].exec( adr, fld );
@@ -221,14 +289,25 @@ class Operator {
         var vm = new VM();
         var op = new Operator( vm );
         // testing...
-        Word reg = op.vm.rA;
-        reg.setvalue( Word.F( 0, 5 ), -500 );
-        out.println( reg );
-        op.exec( 7, Word.F( 0, 2 ), 24 );
-        op.vm.dumpMemory( 5, 10 );
-        op.exec( 7, 0, 33 );
-        op.vm.dumpMemory( 5, 10 );
+        int adr = 5;
+        Word w = op.vm.memory[ adr ];
+        //
+        w.setvalue( Word.F( 0, 5 ), 7 );
+        w.sign = true;
+        op.vm.dumpMemory( 0, 10 );
+        //
+        op.vm.rA.bufr = 0;
+        op.vm.rA.sign = false;
+        op.vm.rX.bufr = 200;
+        op.vm.rX.sign = false;
+        out.println( op.vm.rA );
+        out.println( op.vm.rX );
+        //
+        op.exec( adr, Word.F( 0, 5 ), 4 );
+        out.println( op.vm.rA );
+        out.println( op.vm.rX );
         //
     }
 }
 ////////////////////////////////////////////////////////////////
+// log:
