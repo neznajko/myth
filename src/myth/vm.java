@@ -30,6 +30,11 @@ class Word {
         this.sign = sign; // false is +
         this.bufr = bufr; // this should be positive
     }
+    Word( int value ){
+        sign = value < 0;
+        if( sign ) value = -value;
+        bufr = value;
+    }
     // fedcba9876543210fedcba9876543210
     // --______``````______``````______
     //   1     2     3     4     5

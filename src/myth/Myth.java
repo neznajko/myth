@@ -10,20 +10,22 @@ import java.io.FileReader;
 import java.io.IOException;
 ////////////////////////////////////////////////////////////////
 class Token {
-    static final Token ASTERISK = new Token( Type.ASTER, "*"  ); 
-    static final Token MINUS    = new Token( Type.OPERA, "-"  );
-    static final Token PLUS     = new Token( Type.OPERA, "+"  );
-    static final Token FIELD    = new Token( Type.OPERA, ":"  );
-    static final Token DIV      = new Token( Type.OPERA, "/"  );
-    static final Token DIV2     = new Token( Type.OPERA, "//" );
     enum Type {
         NAMBA, // number
         SAMBO, // symbol
         OPERA, // operator
         ASTER, // asterisk
     }
+    static final Token ASTERISK = new Token( Type.ASTER, "*"  ); 
+    static final Token MINUS    = new Token( Type.OPERA, "-"  );
+    static final Token PLUS     = new Token( Type.OPERA, "+"  );
+    static final Token FIELD    = new Token( Type.OPERA, ":"  );
+    static final Token DIV      = new Token( Type.OPERA, "/"  );
+    static final Token DIV2     = new Token( Type.OPERA, "//" );
+    //
     Type   key;
     String value;
+    //
     Token( Type key, String value ){
         this.key   = key;
         this.value = value;
@@ -38,6 +40,35 @@ class Token {
     }
 }
 ////////////////////////////////////////////////////////////////
+class Cappuccino {
+    static final int MAXSIZ = 10;
+    //
+    String coffee;
+    //
+    static boolean estDigit( char c ){
+        if( c >= '0' && c <= '9' ) return true;
+        return false;
+    }
+    static boolean estLetter( char c ){
+        if( c >= 'A' && c <= 'Z' ) return true;
+        return false;
+    }
+    //
+    Cappuccino( String coffee ){
+        this.coffee = coffee + "*"; // Add a Guard
+    }
+    ArrayList<Token> Analyze(){
+        var ingredients = new ArrayList<Token>();
+        return ingredients;
+    }
+    static public void main( String[] args ){
+        try {
+        } catch( Error e ){
+            System.out.println( e );
+        }
+    }
+}
+////////////////////////////////////////////////////////////////
 class Espresso {
     static final int MAXLEN = 10;
     static boolean estDigit( char c ){
@@ -48,6 +79,7 @@ class Espresso {
         if( c >= 'A' && c <= 'Z' ) return true;
         return false;
     }
+    // log: try to split this function
     static ArrayList<Token> Analyze( String coffee ){
         var ingredients = new ArrayList<Token>();
         int n = coffee.length();

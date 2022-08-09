@@ -2,6 +2,9 @@
 package myth;
 ////////////////////////////////////////////////////////////////
 import static java.lang.System.out;
+import static java.util.Arrays.asList;
+////////////////////////////////////////////////////////////////
+import java.util.ArrayList;
 ////////////////////////////////////////////////////////////////
 class Operator {
     static final int NO_SERVICES = 64;
@@ -240,42 +243,296 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
-    Service serv[] = new Service[ NO_SERVICES ];
+    void enta( int adr, Word reg ){
+        reg.setvalue( 5, adr );
+    }
+    void entaneg( int adr, Word reg ){
+    	enta( -adr, reg ); // switch the flip
+    }
+    class ENTA implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rA );
+        }
+    }
+    class ENTX implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rX );
+        }
+    }
+    class ENT1 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[0] );
+        }
+    }
+    class ENT2 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[1] );
+        }
+    }
+    class ENT3 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[2] );
+        }
+    }
+    class ENT4 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[3] );
+        }
+    }
+    class ENT5 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[4] );
+        }
+    }
+    class ENT6 implements Service {
+        public void exec( int adr, int fld ){
+            enta( adr, vm.rI[5] );
+        }
+    }
+    ////////////////////////////////////////////////////////____
+    //                                                      ENNA
+    class ENNA implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rA );
+        }
+    }
+    class ENNX implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rX );
+        }
+    }
+    class ENN1 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[0] );
+        }
+    }
+    class ENN2 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[1] );
+        }
+    }
+    class ENN3 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[2] );
+        }
+    }
+    class ENN4 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[3] );
+        }
+    }
+    class ENN5 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[4] );
+        }
+    }
+    class ENN6 implements Service {
+        public void exec( int adr, int fld ){
+            enta( -adr, vm.rI[5] );
+        }
+    }
+    // INCA
+////////////////////////////////////////////////////////////////
+    class INCA implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rA.inc( new Word( adr ));
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    class INCX implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rX.inc( new Word( adr ));
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    class INC1 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[0].inc( new Word( adr ));
+            } catch( Exception e ){} // No overflow 
+        }
+    }
+    class INC2 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[1].inc( new Word( adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class INC3 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[2].inc( new Word( adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class INC4 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[3].inc( new Word( adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class INC5 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[4].inc( new Word( adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class INC6 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[5].inc( new Word( adr ));
+            } catch( Exception e ){}
+        }
+    }
+    ////////////////////////////////////////////////////////////
+    //                                                      DECX
+    class DECA implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rA.inc( new Word( -adr ));
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    class DECX implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rX.inc( new Word( -adr ));
+            } catch( Exception e ){
+                vm.overflowToggle = true;
+            }
+        }
+    }
+    class DEC1 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[0].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class DEC2 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[1].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class DEC3 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[2].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class DEC4 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[3].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class DEC5 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[4].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    class DEC6 implements Service {
+        public void exec( int adr, int fld ){
+            try {
+                vm.rI[5].inc( new Word( -adr ));
+            } catch( Exception e ){}
+        }
+    }
+    ////////////////////////////////////////////////////////////
+    // There are operations with same C and different F, one way
+    // is to forget about the serv variable and use switch state-
+    //                                                           
+    //                                                     .tnem-
+    @SuppressWarnings("unchecked")
+    ArrayList<Service> serv[] = new ArrayList[ NO_SERVICES ];
     Operator( VM vm ){
         this.vm = vm;
-        serv[  8 ] = new LDA();
-        serv[ 15 ] = new LDX();
-        serv[  9 ] = new LD1();
-        serv[ 10 ] = new LD2();
-        serv[ 11 ] = new LD3();
-        serv[ 12 ] = new LD4();
-        serv[ 13 ] = new LD5();
-        serv[ 14 ] = new LD6();
-        serv[ 16 ] = new LDAN();
-        serv[ 23 ] = new LDXN();
-        serv[ 17 ] = new LD1N();
-        serv[ 18 ] = new LD2N();
-        serv[ 19 ] = new LD3N();
-        serv[ 20 ] = new LD4N();
-        serv[ 21 ] = new LD5N();
-        serv[ 22 ] = new LD6N();
-        serv[ 24 ] = new STA();
-        serv[ 31 ] = new STX();
-        serv[ 25 ] = new ST1();
-        serv[ 26 ] = new ST2();
-        serv[ 27 ] = new ST3();
-        serv[ 28 ] = new ST4();
-        serv[ 29 ] = new ST5();
-        serv[ 30 ] = new ST6();
-        serv[ 32 ] = new STJ();
-        serv[ 33 ] = new STZ();
-        serv[  1 ] = new ADD();
-        serv[  2 ] = new SUB();
-        serv[  3 ] = new MUL();
-        serv[  4 ] = new DIV();
+        serv[  8 ] = new ArrayList<>( asList( new LDA() ));
+        serv[ 15 ] = new ArrayList<>( asList( new LDX() ));
+        serv[  9 ] = new ArrayList<>( asList( new LD1() ));
+        serv[ 10 ] = new ArrayList<>( asList( new LD2() ));
+        serv[ 11 ] = new ArrayList<>( asList( new LD3() ));
+        serv[ 12 ] = new ArrayList<>( asList( new LD4() ));
+        serv[ 13 ] = new ArrayList<>( asList( new LD5() ));
+        serv[ 14 ] = new ArrayList<>( asList( new LD6() ));
+        serv[ 16 ] = new ArrayList<>( asList( new LDAN() ));
+        serv[ 23 ] = new ArrayList<>( asList( new LDXN() ));
+        serv[ 17 ] = new ArrayList<>( asList( new LD1N() ));
+        serv[ 18 ] = new ArrayList<>( asList( new LD2N() ));
+        serv[ 19 ] = new ArrayList<>( asList( new LD3N() ));
+        serv[ 20 ] = new ArrayList<>( asList( new LD4N() ));
+        serv[ 21 ] = new ArrayList<>( asList( new LD5N() ));
+        serv[ 22 ] = new ArrayList<>( asList( new LD6N() ));
+        serv[ 24 ] = new ArrayList<>( asList( new STA() ));
+        serv[ 31 ] = new ArrayList<>( asList( new STX() ));
+        serv[ 25 ] = new ArrayList<>( asList( new ST1() ));
+        serv[ 26 ] = new ArrayList<>( asList( new ST2() ));
+        serv[ 27 ] = new ArrayList<>( asList( new ST3() ));
+        serv[ 28 ] = new ArrayList<>( asList( new ST4() ));
+        serv[ 29 ] = new ArrayList<>( asList( new ST5() ));
+        serv[ 30 ] = new ArrayList<>( asList( new ST6() ));
+        serv[ 32 ] = new ArrayList<>( asList( new STJ() ));
+        serv[ 33 ] = new ArrayList<>( asList( new STZ() ));
+        serv[  1 ] = new ArrayList<>( asList( new ADD() ));
+        serv[  2 ] = new ArrayList<>( asList( new SUB() ));
+        serv[  3 ] = new ArrayList<>( asList( new MUL() ));
+        serv[  4 ] = new ArrayList<>( asList( new DIV() ));
+        serv[ 48 ] = new ArrayList<>( asList( new INCA(),
+                                              new DECA(),
+                                              new ENTA(),
+                                              new ENNA() ));
+        serv[ 55 ] = new ArrayList<>( asList( new INCX(),
+                                              new DECX(),
+                                              new ENTX(),
+                                              new ENNX() ));
+        serv[ 49 ] = new ArrayList<>( asList( new INC1(),
+                                              new DEC1(),
+                                              new ENT1(),
+                                              new ENN1() ));
+        serv[ 50 ] = new ArrayList<>( asList( new INC2(),
+                                              new DEC2(),
+                                              new ENT2(),
+                                              new ENN2() ));
+        serv[ 51 ] = new ArrayList<>( asList( new INC3(),
+                                              new DEC3(),
+                                              new ENT3(),
+                                              new ENN3() ));
+        serv[ 52 ] = new ArrayList<>( asList( new INC4(),
+                                              new DEC4(),
+                                              new ENT4(),
+                                              new ENN4() ));
+        serv[ 53 ] = new ArrayList<>( asList( new INC5(),
+                                              new DEC5(),
+                                              new ENT5(),
+                                              new ENN5() ));
+        serv[ 54 ] = new ArrayList<>( asList( new INC6(),
+                                              new DEC6(),
+                                              new ENT6(),
+                                              new ENN6() ));
     }
     void exec( int adr, int fld, int code ){
-        serv[ code ].exec( adr, fld );
+        if( serv[ code ].size() == 1 ){
+            serv[ code ].get( 0 ).exec( adr, fld );
+        } else {
+            serv[ code ].get( fld ).exec( adr, fld );
+        }
     }
     void exec( Word w ){
         var insWord = new InsWord( w );
@@ -289,25 +546,11 @@ class Operator {
         var vm = new VM();
         var op = new Operator( vm );
         // testing...
-        int adr = 5;
-        Word w = op.vm.memory[ adr ];
-        //
-        w.setvalue( Word.F( 0, 5 ), 7 );
-        w.sign = true;
-        op.vm.dumpMemory( 0, 10 );
-        //
-        op.vm.rA.bufr = 0;
-        op.vm.rA.sign = false;
-        op.vm.rX.bufr = 200;
-        op.vm.rX.sign = false;
-        out.println( op.vm.rA );
-        out.println( op.vm.rX );
-        //
-        op.exec( adr, Word.F( 0, 5 ), 4 );
-        out.println( op.vm.rA );
-        out.println( op.vm.rX );
+        int adr = -11;
+        op.exec( adr, 3, 48 ); // ENTA
+        out.println( vm.rA );
         //
     }
 }
 ////////////////////////////////////////////////////////////////
-// log:
+// log: - Change default fields of the myth instructions. []

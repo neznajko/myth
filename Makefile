@@ -8,9 +8,8 @@ COMPILE := javac -d $(BINPATH) -cp $(BINPATH)
 
 .DEFAULT_GOAL := all
 
-# this is not matching 'what$ever.class' files
 clean:
-	@$(RM) -v $(wildcard $(BINPATH)/$(PROJECT)/*.class)
+	@$(RM) -v $(BINPATH)/$(PROJECT)/*
 
 parser: 
 	$(COMPILE) $(SRCPATH)/parser.java
