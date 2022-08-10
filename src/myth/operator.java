@@ -456,6 +456,22 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
+    class CMPA implements Service {
+        public void exec( int adr, int fld ){
+            Word w = new Word( 0 );
+            load( adr, fld, w );
+            int a = vm.rA.getfld( Word.L( fld ), Word.R( fld ));
+            int b = (int) w.getval();
+            if( a < b ) {
+                vm.comparizonIndykate = VM.LESS;
+            } else if ( a == b ) {
+                vm.comparizonIndykate = VM.EQUAL;
+            } else {
+                vm.comparizonIndykate = VM.GREATER;
+            }            
+        }
+    }
+    ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
     //                                                           
@@ -526,6 +542,7 @@ class Operator {
                                               new DEC6(),
                                               new ENT6(),
                                               new ENN6() ));
+        serv[ 56 ] = new ArrayList<>( asList( new CMPA()));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -546,9 +563,15 @@ class Operator {
         var vm = new VM();
         var op = new Operator( vm );
         // testing...
-        int adr = -11;
-        op.exec( adr, 3, 48 ); // ENTA
+        int adr = 0;
+        int fld = Word.F( 0, 2 );
+        Word w = vm.memory[ adr ];
+        w.setvalue( fld, 200 );
+        vm.rA.setvalue( fld, 205 );
+        op.exec( adr, fld, 56 ); // CMPA
+        vm.dumpMemory( 0, 5 );
         out.println( vm.rA );
+        out.println( vm.comparizonIndykate );
         //
     }
 }

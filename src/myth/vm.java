@@ -264,6 +264,9 @@ class InsWord { // Instruction Word
 class VM { // Virtual Machine
     static final int MEMSIZ = 100; // number of words
     static final int NIDX   = 6;   // nof index registers
+    static final int LESS    = -1;
+    static final int EQUAL   = 0;
+    static final int GREATER = 1;    
     Word memory[] = new Word[ MEMSIZ ]; // per sé( wtf? )
     int end = 5; // vhere to insert literals
     Word rA;
@@ -271,6 +274,7 @@ class VM { // Virtual Machine
     Word rI[] = new Word[ NIDX ];
     Word rJ;
     boolean overflowToggle;
+    int comparizonIndykate;
     Operator op;
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){

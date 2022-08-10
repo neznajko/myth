@@ -9,6 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 ////////////////////////////////////////////////////////////////
+import static java.lang.System.out;
+////////////////////////////////////////////////////////////////
 class Token {
     enum Type {
         NAMBA, // number
@@ -36,12 +38,20 @@ class Token {
     }
     public static void main( String[] args ){
         Token m = new Token( Token.Type.NAMBA, "5134" );
-        System.out.println( m );
+        out.println( m );
     }
 }
 ////////////////////////////////////////////////////////////////
 class Cappuccino {
-    static final int MAXSIZ = 10;
+    static final int MAXSIZ = 10; // symbols and numbers
+    //
+    static HashMap<Character, Token> map = new HashMap<>();
+    static {
+        map.put( '*', Token.ASTERISK );
+        map.put( '-', Token.MINUS );
+        map.put( '+', Token.PLUS );
+        map.put( ':', Token.FIELD );
+    }
     //
     String coffee;
     //
@@ -53,18 +63,74 @@ class Cappuccino {
         if( c >= 'A' && c <= 'Z' ) return true;
         return false;
     }
+    static boolean estAlphaNumeric( char c ){
+        return estLetter( c ) || estDigit( c );
+    }
     //
     Cappuccino( String coffee ){
-        this.coffee = coffee + "*"; // Add a Guard
+        this.coffee = coffee + "*"; // Guard
     }
-    ArrayList<Token> Analyze(){
+    ////////////////////////////////////////////////////////////
+    // getOperator: -> Token <- int( j )
+    // j must be over non digit or letter character
+    Token getOperator( int j ){ ///////////////////////////////_
+        char c = coffee.charAt( j );
+        if( c == '/' ){
+            try {
+                return( coffee.charAt( j + 1 ) == '/' ?
+                        Token.DIV2 :
+                        Token.DIV );
+            } catch( Exception e ){
+                throw new Error( "// <<" );
+            }
+        }
+        if(! map.containsKey( c )) throw new Error( "o_o" );
+
+        return map.get( c );
+    }
+    int eatAlphaNumerics( int i ){
+        for(; estAlphaNumeric( coffee.charAt( i )); i++ )
+            ;
+        return i;
+    }
+    Token getOperand( String value ){
+        if( value.length() > MAXSIZ ) throw new Error( "wtf?" );
+        int dc = 0; // digit counter
+        for( int j = 0; j < value.length(); ++j ){
+            if( estDigit( value.charAt( j ))) ++dc;
+        }
+        Token.Type key = Token.Type.SAMBO;
+        if( dc == value.length() ){
+            key = Token.Type.NAMBA;
+        }
+        return new Token( key, value );
+    }
+    ArrayList<Token> Analyze(){               
         var ingredients = new ArrayList<Token>();
+        int j;
+        for( int i = 0; i < coffee.length(); i = j ){
+            j = eatAlphaNumerics( i );
+            if( j > i ){
+                String a = coffee.substring( i, j );
+                Token operand = getOperand( a );
+                ingredients.add( operand );                
+            }
+            Token operator = getOperator( j );
+            if( operator != null ){
+                ingredients.add( operator );
+                j += operator.value.length();
+            }
+        }
+        // Discard Guard Token
+        ingredients.remove( ingredients.size() - 1 );
         return ingredients;
     }
     static public void main( String[] args ){
         try {
+            out.println( new Cappuccino( "-5/2+HAHA" )
+                         .Analyze());
         } catch( Error e ){
-            System.out.println( e );
+            out.println( e );
         }
     }
 }
@@ -138,10 +204,10 @@ class Espresso {
     static public void main( String[] args ){
         try {
             for( Token m: Espresso.Analyze( args[ 0 ])) {
-                System.out.println( m );
+                out.println( m );
             }
         } catch( Error e ){
-            System.out.println( e );
+            out.println( e );
         }
     }
 }
@@ -166,7 +232,7 @@ class Fields {
     }
     public static void main( String[] args ){
         Fields f = new Fields( args[ 0 ]);
-        System.out.println( f );
+        out.println( f );
     }
 }
 ////////////////////////////////////////////////////////////////
@@ -180,7 +246,7 @@ class Scanner {
             FileReader fr = new FileReader( fileName );
             input = new BufferedReader( fr );
         } catch ( FileNotFoundException e ){
-            System.out.println( e );
+            out.println( e );
         }
     }
     Fields getnext() throws IOException {
@@ -202,10 +268,10 @@ class Scanner {
             while( true ) {
                 Fields f = scanner.getnext();
                 if( f == null ) break;
-                System.out.println( f );
+                out.println( f );
             }
         } catch( Throwable t ){
-            System.out.println( t.getMessage());
+            out.println( t.getMessage());
         }
     }
 }
@@ -373,14 +439,15 @@ class Instruction {
         map.put( "CHAR", new Pair<>(  5, 1 ));
     }
     public static void main( String[] args ){
-        System.out.println( map );
+        out.println( map );
     }
 }
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 public class Myth {
     public static void main( String[] args ){
-        System.out.println( "Myth" );
+        out.println( "Myth" );
     }
 }
 ////////////////////////////////////////////////////////////////
+// log: -Debug a little bit and replace Espresso with Cappuccino
