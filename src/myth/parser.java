@@ -176,7 +176,7 @@ class Parser { /////////////////////////////////////////////////
     // where d is 0-9 digit.
     static Pair<Lab,Integer> checkLab( String tok ){
         if( tok.length() != 2 ||
-            false == Espresso.estDigit( tok.charAt( 0 ))){
+            false == Espresso.isDigit( tok.charAt( 0 ))){
             return LABERR;
         }
         int d = tok.charAt( 0 ) - '0';
@@ -191,7 +191,7 @@ class Parser { /////////////////////////////////////////////////
     // Check the correctness of the LOC field. On error return 
     // -1, if label return its number(0-9), otherwise return 10.
     static int checkLoc( String loc ){
-        var espresso = Espresso.Analyze( loc );
+        var espresso = new Espresso( loc ).Analyze();
         if( espresso.size() != 1 ) return -1;
         var tok = espresso.get( 0 );
         if( tok.key != Token.Type.SAMBO ) return -1;
@@ -336,11 +336,11 @@ class Parser { /////////////////////////////////////////////////
         try {
             for( final var walueComp: Word.walueSplit( walue )){
                 // Here walueComp is an <E,F> pair.
-                int F = eval( Espresso.Analyze( walueComp.y ));
+                int F = eval( new Espresso( walueComp.y ).Analyze());
                 if(! checkField( F )){
                     throw new Error( "Not valid field" );
                 }
-                int E = eval( Espresso.Analyze( walueComp.x ));
+                int E = eval( new Espresso( walueComp.x ).Analyze());
                 w.setvalue( F, E ); 
             }
         } catch (Exception e ) {
@@ -372,7 +372,7 @@ class Parser { /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     int isFutureRef( String a ){
         if( a.isEmpty()) return 0;
-        final var coffee = Espresso.Analyze( a );
+        final var coffee = new Espresso( a ).Analyze();
         int val = Integer.MAX_VALUE;
         try {
             val = eval( coffee );
@@ -404,13 +404,13 @@ class Parser { /////////////////////////////////////////////////
         // evaluate i,f-parts
         int ival = 0;
         if(! adr.i.isEmpty() ){
-            ival = eval( Espresso.Analyze( adr.i ));
+            ival = eval( new Espresso( adr.i ).Analyze());
         }
         final var instr = Instruction.map.get( op );
         int code = instr.x;
         int fld  = instr.y; // default
         if(! adr.f.isEmpty() ){
-            fld = eval( Espresso.Analyze( adr.f ));
+            fld = eval( new Espresso( adr.f ).Analyze());
         }
         Word w = vm.memory[ pc ];
         w.setvalue( Word.INSTR_ADR, aval ); // 0:2

@@ -42,8 +42,8 @@ class Token {
     }
 }
 ////////////////////////////////////////////////////////////////
-class Cappuccino {
-    static final int MAXSIZ = 10; // symbols and numbers
+class Espresso {
+    static final int MAXSIZ = 10; // f0r symbols and numbers
     //
     static HashMap<Character, Token> map = new HashMap<>();
     static {
@@ -55,49 +55,44 @@ class Cappuccino {
     //
     String coffee;
     //
-    static boolean estDigit( char c ){
+    static boolean isDigit( char c ){
         if( c >= '0' && c <= '9' ) return true;
         return false;
     }
-    static boolean estLetter( char c ){
+    static boolean isLetter( char c ){
         if( c >= 'A' && c <= 'Z' ) return true;
         return false;
     }
-    static boolean estAlphaNumeric( char c ){
-        return estLetter( c ) || estDigit( c );
+    static boolean isAlphaNum( char c ){
+        return isLetter( c ) || isDigit( c );
     }
     //
-    Cappuccino( String coffee ){
-        this.coffee = coffee + "*"; // Guard
+    Espresso( String coffee ){
+        this.coffee = coffee + "*"; // add Guard
     }
     ////////////////////////////////////////////////////////////
-    // getOperator: -> Token <- int( j )
-    // j must be over non digit or letter character
-    Token getOperator( int j ){ ///////////////////////////////_
+    // getOpera: -> Token <- int( j )
+    // j must be over non digit or letter
+    Token getOpera( int j ){ //////////////////////////////////_
         char c = coffee.charAt( j );
         if( c == '/' ){
-            try {
-                return( coffee.charAt( j + 1 ) == '/' ?
-                        Token.DIV2 :
-                        Token.DIV );
-            } catch( Exception e ){
-                throw new Error( "// <<" );
-            }
+            return( coffee.charAt( j + 1 ) == '/' ?
+                    Token.DIV2 :
+                    Token.DIV );
         }
-        if(! map.containsKey( c )) throw new Error( "o_o" );
-
+        if(! map.containsKey( c )) throw new Error( "ö_o" );
         return map.get( c );
     }
-    int eatAlphaNumerics( int i ){
-        for(; estAlphaNumeric( coffee.charAt( i )); i++ )
+    int atOpera( int i ){ // find next begining of an OPERA token
+        for(; isAlphaNum( coffee.charAt( i )); i++ )
             ;
         return i;
     }
-    Token getOperand( String value ){
+    Token getSamba( String value ){ // Nambà ö Sambo
         if( value.length() > MAXSIZ ) throw new Error( "wtf?" );
         int dc = 0; // digit counter
         for( int j = 0; j < value.length(); ++j ){
-            if( estDigit( value.charAt( j ))) ++dc;
+            if( isDigit( value.charAt( j ))) ++dc;
         }
         Token.Type key = Token.Type.SAMBO;
         if( dc == value.length() ){
@@ -109,103 +104,23 @@ class Cappuccino {
         var ingredients = new ArrayList<Token>();
         int j;
         for( int i = 0; i < coffee.length(); i = j ){
-            j = eatAlphaNumerics( i );
+            j = atOpera( i );
             if( j > i ){
                 String a = coffee.substring( i, j );
-                Token operand = getOperand( a );
-                ingredients.add( operand );                
+                ingredients.add( getSamba( a ));
             }
-            Token operator = getOperator( j );
-            if( operator != null ){
-                ingredients.add( operator );
-                j += operator.value.length();
-            }
+            Token operator = getOpera( j );
+            ingredients.add( operator );
+            j += operator.value.length();
         }
-        // Discard Guard Token
+        // Discard the Guard Token
         ingredients.remove( ingredients.size() - 1 );
         return ingredients;
     }
     static public void main( String[] args ){
         try {
-            out.println( new Cappuccino( "-5/2+HAHA" )
+            out.println( new Espresso( "-15:WTF2/4+HAHA+10" )
                          .Analyze());
-        } catch( Error e ){
-            out.println( e );
-        }
-    }
-}
-////////////////////////////////////////////////////////////////
-class Espresso {
-    static final int MAXLEN = 10;
-    static boolean estDigit( char c ){
-        if( c >= '0' && c <= '9' ) return true;
-        return false;
-    }
-    static boolean estLetter( char c ){
-        if( c >= 'A' && c <= 'Z' ) return true;
-        return false;
-    }
-    // log: try to split this function
-    static ArrayList<Token> Analyze( String coffee ){
-        var ingredients = new ArrayList<Token>();
-        int n = coffee.length();
-        for( int i = 0; i < n; ){
-            char c = coffee.charAt( i++ );
-            switch( c ){
-            case '*':
-                ingredients.add( Token.ASTERISK );
-                break;
-            case ':':
-                ingredients.add( Token.FIELD );
-                break;
-            case '-':
-                ingredients.add( Token.MINUS );
-                break;
-            case '+':
-                ingredients.add( Token.PLUS );
-                break;
-            case '/':
-                if( i < n && coffee.charAt( i ) == '/' ){
-                    ingredients.add( Token.DIV2 );
-                    i++;
-                } else {
-                    ingredients.add( Token.DIV );
-                }
-                break;
-            default:
-                int j = --i;
-                boolean flag = true; // number flag
-                for(; j < n; j++ ){
-                    c = coffee.charAt( j );
-                    if( estLetter( c )){
-                        flag = false;
-                    } else if( estDigit( c )){
-                        continue;
-                    } else {
-                        break;
-                    }
-                }
-                if( i == j || j - i > MAXLEN ){
-                    throw new Error( "espresso: " + coffee );
-                }
-                String value = coffee.substring( i, j );
-                if( flag ){
-                    var key = Token.Type.NAMBA;
-                    ingredients.add( new Token( key, value ));
-                } else {
-                    var key = Token.Type.SAMBO;
-                    ingredients.add( new Token( key, value ));
-                }
-                i = j;
-            }
-        }
-        return ingredients;
-    }
-    static public void main( String[] args ){
-        try {
-            for( Token m: Espresso.Analyze( args[ 0 ])) {
-                out.println( m );
-            }
         } catch( Error e ){
             out.println( e );
         }
@@ -450,4 +365,4 @@ public class Myth {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: -Debug a little bit and replace Espresso with Cappuccino
+// log: -Debug a little bit and replace Espresso with Espresso

@@ -456,19 +456,57 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
+    void comp( int adr, int fld, Word reg ) {
+        Word w = new Word( 0 );
+        load( adr, fld, w );
+        int a = reg.getfld( Word.L( fld ), Word.R( fld ));
+        int b = (int) w.getval();
+        if( a < b ) {
+            vm.comparizonIndykate = VM.LESS;
+        } else if ( a == b ) {
+            vm.comparizonIndykate = VM.EQUAL;
+        } else {
+            vm.comparizonIndykate = VM.GREATER;
+        }            
+    }
     class CMPA implements Service {
         public void exec( int adr, int fld ){
-            Word w = new Word( 0 );
-            load( adr, fld, w );
-            int a = vm.rA.getfld( Word.L( fld ), Word.R( fld ));
-            int b = (int) w.getval();
-            if( a < b ) {
-                vm.comparizonIndykate = VM.LESS;
-            } else if ( a == b ) {
-                vm.comparizonIndykate = VM.EQUAL;
-            } else {
-                vm.comparizonIndykate = VM.GREATER;
-            }            
+            comp( adr, fld, vm.rA );
+        }
+    }
+    class CMPX implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rX );
+        }
+    }
+    class CMP1 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[0] );
+        }
+    }
+    class CMP2 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[1] );
+        }
+    }
+    class CMP3 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[2] );
+        }
+    }
+    class CMP4 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[3] );
+        }
+    }
+    class CMP5 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[4] );
+        }
+    }
+    class CMP6 implements Service {
+        public void exec( int adr, int fld ){
+            comp( adr, fld, vm.rI[5] );
         }
     }
     ////////////////////////////////////////////////////////////
@@ -542,7 +580,14 @@ class Operator {
                                               new DEC6(),
                                               new ENT6(),
                                               new ENN6() ));
-        serv[ 56 ] = new ArrayList<>( asList( new CMPA()));
+        serv[ 56 ] = new ArrayList<>( asList( new CMPA() ));
+        serv[ 63 ] = new ArrayList<>( asList( new CMPX() ));
+        serv[ 57 ] = new ArrayList<>( asList( new CMP1() ));
+        serv[ 58 ] = new ArrayList<>( asList( new CMP2() ));
+        serv[ 59 ] = new ArrayList<>( asList( new CMP3() ));
+        serv[ 60 ] = new ArrayList<>( asList( new CMP4() ));
+        serv[ 61 ] = new ArrayList<>( asList( new CMP5() ));
+        serv[ 62 ] = new ArrayList<>( asList( new CMP6() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -564,13 +609,14 @@ class Operator {
         var op = new Operator( vm );
         // testing...
         int adr = 0;
-        int fld = Word.F( 0, 2 );
+        int fld = Word.F( 0, 5 );
         Word w = vm.memory[ adr ];
         w.setvalue( fld, 200 );
-        vm.rA.setvalue( fld, 205 );
+        Word reg = vm.rI[0];
+        reg.setvalue( fld, 199 );
         op.exec( adr, fld, 56 ); // CMPA
         vm.dumpMemory( 0, 5 );
-        out.println( vm.rA );
+        out.println( reg );
         out.println( vm.comparizonIndykate );
         //
     }
