@@ -457,45 +457,43 @@ class Parser { /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
     // log: 0
     void firstPass( String fileName ) throws Exception {
-        Scanner sc = new Scanner( fileName );
-        Word w;
-        while( true ){
-            Fields line = sc.getnext();
-            if( line == null ) break; // EOF
-            out.print( pc + ": " + line );
+        Skanner ska = new Skanner( fileName );
+        while( ska.getnext()) {
+            out.print( pc + ": " + ska );
             // LOC
-            if( line.loc.isEmpty() == false ){
-                int d = checkLoc( line.loc );
+            if( ska.loc.isEmpty() == false ){
+                int d = checkLoc( ska.loc );
                 if( d == -1 ){
                     throw new Error( "LOC" );
                 } else if( d == DIGITS ){
-                    tab.put( line.loc, pc );
+                    tab.put( ska.loc, pc );
                 } else {
                     lab[ d ].add( pc );
                 }
             }
             // OP
-            if( line.op.isEmpty() == false ){
-                switch( checkOp( line.op )) {
+            Word w;
+            if( ska.op.isEmpty() == false ){
+                switch( checkOp( ska.op )) {
                 case MIX:
-                    asm( line.op, new Address( line.adr ));
+                    asm( ska.op, new Address( ska.adr ));
                     break;
                 case EQU:
-                    w = evalWalue( line.adr );
-                    tab.put( line.loc, w.getfld( 0, Word.BYTES ));
+                    w = evalWalue( ska.adr );
+                    tab.put( ska.loc, w.getfld( 0, Word.BYTES ));
                     pc--;
                     break;
                 case ORIG:
-                    w = evalWalue( line.adr );
+                    w = evalWalue( ska.adr );
                     pc = w.getfld( 0, Word.BYTES ) - 1;
                     break;
                 case CON:
-                    w = evalWalue( line.adr );
+                    w = evalWalue( ska.adr );
                     vm.memory[ pc ] = w;
                     break;
                 case ALF:
-                    // log: allow spaces to appear in line.adr
-                    encode( line.adr );
+                    // log: allow spaces to appear in ska.adr
+                    encode( ska.adr );
                     break;
                 case END:
                     vm.end = pc;

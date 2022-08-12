@@ -130,60 +130,56 @@ class Espresso {
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
-class Fields {
+////////////////////////////////////////////////////////////////
+class Skanner {
+    static final String GUARD = "   remark"; // f0r op and adr
     String loc;
     String op;
     String adr;
-    Fields( String line ){
-        line += "   remark"; // add op and adr guards
+    BufferedReader sors;
+    //
+    static boolean isRemark( String line ){
+        return( line.charAt( 0 ) == '*' );
+    }
+    //
+    Skanner( String fpath ){
+        try {
+            sors = new BufferedReader( new FileReader( fpath ));
+        } catch ( FileNotFoundException e ){
+            throw new Error( e.getMessage() );
+        }
+    }
+    void Decompose( String line ){
+        line += GUARD;
         String[] f = line.split( "\\s" );
         loc  = f[ 0 ];
         op   = f[ 1 ];
-        adr = f[ 2 ];
+        adr  = f[ 2 ];
+    }
+    boolean getnext() throws IOException {
+        while( true ){
+            String line = sors.readLine();
+            if( line == null ){
+                sors.close();
+                break;
+            }
+            if( isRemark( line ) || line.trim().isEmpty()){
+                continue;
+            }
+            Decompose( line );
+            return true;
+        }
+        return false;
     }
     @Override
     public String toString() {
-        return "(" + loc + "|" + op + "|" + adr + ")\n";
-    }
-    public static void main( String[] args ){
-        Fields f = new Fields( args[ 0 ]);
-        out.println( f );
-    }
-}
-////////////////////////////////////////////////////////////////
-class Scanner {
-    BufferedReader input = null;
-    static boolean estRemark( String line ){
-        return( line.charAt( 0 ) == '*' );
-    }
-    Scanner( String fileName ){
-        try {
-            FileReader fr = new FileReader( fileName );
-            input = new BufferedReader( fr );
-        } catch ( FileNotFoundException e ){
-            out.println( e );
-        }
-    }
-    Fields getnext() throws IOException {
-        while( true ){
-            String line = input.readLine();
-            if( line == null ){
-                input.close();
-                return null;
-            }
-            if( line.trim().isEmpty() || estRemark( line )){
-                continue;
-            }
-            return new Fields( line );
-        }
+        return loc + "|" + op + "|" + adr;
     }
     public static void main( String args[] ){
         try {
-            Scanner scanner = new Scanner( args[0] );
-            while( true ) {
-                Fields f = scanner.getnext();
-                if( f == null ) break;
-                out.println( f );
+            Skanner ska = new Skanner( args[0] );
+            while( ska.getnext()) {
+                out.println( ska );
             }
         } catch( Throwable t ){
             out.println( t.getMessage());
@@ -210,20 +206,20 @@ class Instruction {
         map = new HashMap<>();
         map.put(  "LDA", new Pair<>(  8, 5 )); // Loading
         map.put(  "LDX", new Pair<>( 15, 5 ));
-        map.put(  "LD1", new Pair<>(  9, 0 ));
-        map.put(  "LD2", new Pair<>( 10, 0 ));
-        map.put(  "LD3", new Pair<>( 11, 0 ));
-        map.put(  "LD4", new Pair<>( 12, 0 ));
-        map.put(  "LD5", new Pair<>( 13, 0 ));
-        map.put(  "LD6", new Pair<>( 14, 0 ));
+        map.put(  "LD1", new Pair<>(  9, 5 ));
+        map.put(  "LD2", new Pair<>( 10, 5 ));
+        map.put(  "LD3", new Pair<>( 11, 5 ));
+        map.put(  "LD4", new Pair<>( 12, 5 ));
+        map.put(  "LD5", new Pair<>( 13, 5 ));
+        map.put(  "LD6", new Pair<>( 14, 5 ));
         map.put( "LDAN", new Pair<>( 16, 5 ));
         map.put( "LDXN", new Pair<>( 23, 5 ));
-        map.put( "LD1N", new Pair<>( 17, 0 ));
-        map.put( "LD2N", new Pair<>( 18, 0 ));
-        map.put( "LD3N", new Pair<>( 19, 0 ));
-        map.put( "LD4N", new Pair<>( 20, 0 ));
-        map.put( "LD5N", new Pair<>( 21, 0 ));
-        map.put( "LD6N", new Pair<>( 22, 0 ));
+        map.put( "LD1N", new Pair<>( 17, 5 ));
+        map.put( "LD2N", new Pair<>( 18, 5 ));
+        map.put( "LD3N", new Pair<>( 19, 5 ));
+        map.put( "LD4N", new Pair<>( 20, 5 ));
+        map.put( "LD5N", new Pair<>( 21, 5 ));
+        map.put( "LD6N", new Pair<>( 22, 5 ));
         map.put(  "STA", new Pair<>( 24, 5 )); // Storing
         map.put(  "STX", new Pair<>( 31, 5 ));
         map.put(  "ST1", new Pair<>( 25, 5 ));
@@ -345,7 +341,7 @@ class Instruction {
         map.put( "MOVE", new Pair<>(  7, 0 ));
         map.put(  "NOP", new Pair<>(  0, 0 ));
         map.put(  "HLT", new Pair<>(  0, 2 ));
-        map.put(   "IN", new Pair<>( 36, 0 )); // Input-Output
+        map.put(   "IN", new Pair<>( 36, 0 )); // I/O
         map.put(  "OUT", new Pair<>( 37, 0 ));
         map.put(  "IOC", new Pair<>( 35, 0 ));
         map.put( "JRED", new Pair<>( 38, 0 ));
@@ -365,4 +361,4 @@ public class Myth {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: -Debug a little bit and replace Espresso with Espresso
+// log:

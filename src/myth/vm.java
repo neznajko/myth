@@ -9,6 +9,8 @@ class Word {
     static final int BYTES   = 5;
     static final int BYTESIZ = 6; // nof bits
     static final int INTSIZ  = 32;
+    static final long WORD_MASK = 0x000000003fffffffL; // fst 30 bits
+    //                            0xffffffffc0000000L
     // L:R = F = 8L + R
     static int L( int fld ){
         return fld / 8;
@@ -206,7 +208,12 @@ class Word {
         }
         return ls;
     }
-    ///////_////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
+    boolean isNull() {
+        return ( bufr & WORD_MASK ) == 0;
+    }
+    ////////////////////////////////////////////////////////////
+    ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
         Word w = new Word( false , 0 );
@@ -226,9 +233,10 @@ class Word {
         }
     }                     
 }
-////////////////////////////////////////////////////////////////////////
-// Ok, now we have a memory with instructions,( and data ) first we want
-// to decode the instruction
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+// Ok, now we have a memory with instructions,( and data ) first
+// we want to decode the instruction
 class InsWord { // Instruction Word
     int adr;
     int idx;
@@ -260,21 +268,24 @@ class InsWord { // Instruction Word
 // | A | X |
 // +---+---+
 //
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 class VM { // Virtual Machine
-    static final int MEMSIZ = 100; // number of words
-    static final int NIDX   = 6;   // nof index registers
+    static final int MEMSIZ  = 100; // number of words
+    static final int NIDX    = 6;   // nof index registers
     static final int LESS    = -1;
     static final int EQUAL   = 0;
     static final int GREATER = 1;    
     Word memory[] = new Word[ MEMSIZ ]; // per sé( wtf? )
-    int end = 5; // vhere to insert literals
+    int start = 0; // these should be set by the Parser
+    int end   = 5; // vhere to insert literals
     Word rA;
     Word rX;
     Word rI[] = new Word[ NIDX ];
     Word rJ;
     boolean overflowToggle;
     int comparizonIndykate;
+    int pc; // the program counter
     Operator op;
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){
@@ -287,10 +298,13 @@ class VM { // Virtual Machine
         }
         rJ = new Word( false, 0 );
         overflowToggle = false;
+        comparizonIndykate = EQUAL;
+        pc = 0;
         op = new Operator( this );
     }
-    // Dump memory in the address interval [ lo, hi ), for dumping all
-    // memory use [ 0, MEMSIZ ) range.
+    ////////////////////////////////////////////////////////////
+    // Dump memory in the address interval [ lo, hi ), for dumping
+    // all memory use [ 0, MEMSIZ ) range.
     void dumpMemory( int lo, int hi ){
         var b = new StringBuilder();
         for( int j = lo; j < hi; j++) {
@@ -299,6 +313,13 @@ class VM { // Virtual Machine
             b.append( "\n" );
         }
         out.println( b.toString());
+    }
+    void cpu() { // thats the cycle
+        while( pc != end ){
+            Word w = memory[ pc ];
+            op.exec( w );
+            ++pc;
+        }
     }
     public static void main( String[] args ){
         VM vm = new VM();
@@ -309,4 +330,5 @@ class VM { // Virtual Machine
         out.println( insWord );
     }
 }
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////

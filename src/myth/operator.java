@@ -510,9 +510,45 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
+    // To continue program execution ONE SHOULD RE-ESTABLISH the
+    // program counter pc from the jump register rJ when exiting
+    // from a function, and jump to it.
+    void jump( int adr, boolean backup ) {
+        if( backup ){
+            vm.rJ.setvalue( Word.F( 0, 2 ), vm.pc + 1 );
+        }
+        vm.pc = adr - 1;
+    }
+    class JMP implements Service {
+        public void exec( int adr, int fld ){
+            jump( adr, true );
+        }
+    }
+    class JSJ implements Service { // First jump and than shoot!
+        public void exec( int adr, int fld ){
+            jump( adr, false );
+        }
+    }
+    class JOV implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.overflowToggle ){
+                vm.overflowToggle = false;
+                jump( adr, true );
+            }
+        }
+    }
+    class JNOV implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.overflowToggle ){
+                vm.overflowToggle = false;
+            } else {
+                jump( adr, true );
+            }
+        }
+    }
+    ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
-    //                                                           
     //                                                     .tnem-
     @SuppressWarnings("unchecked")
     ArrayList<Service> serv[] = new ArrayList[ NO_SERVICES ];
@@ -588,6 +624,10 @@ class Operator {
         serv[ 60 ] = new ArrayList<>( asList( new CMP4() ));
         serv[ 61 ] = new ArrayList<>( asList( new CMP5() ));
         serv[ 62 ] = new ArrayList<>( asList( new CMP6() ));
+        serv[ 39 ] = new ArrayList<>( asList( new JMP(),
+                                              new JSJ(),
+                                              new JOV(),
+                                              new JNOV() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -622,4 +662,4 @@ class Operator {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - Change default fields of the myth instructions. []
+// log:
