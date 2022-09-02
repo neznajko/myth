@@ -6,40 +6,42 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 ////////////////////////////////////////////////////////////////
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+////////////////////////////////////////////////////////////////
 import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 // All evaluations are within Parser because of symbol table and
 // program counter, not to mention the lab arrays, zo all fields
 // for that reason are strings. 
-class Address {
-    // a,i(f)
-    String a = "0",
-           i =  "",
-           f =  "";
+class Address { // a,i(f)
+    static Pattern pattern = Pattern.compile
+        ( "([^,()]+)(,[^()]+)*(\\(.+\\))*" );
+    // I could write a blog article explaining this regex.
+    String a = "0";
+    String i = "";
+    String f = "";
+    //
+    Address( String adr ){
+        if( adr.isEmpty() ) return;
+        Matcher matcher = pattern.matcher( adr );
+        if(! matcher.find()) {
+            throw new Error( "regex" );
+        }
+        a = matcher.group( 1 );
+        String g = matcher.group( 2 );
+        if( g != null ){
+            i = g.substring( 1 );
+        }
+        g = matcher.group( 3 );
+        if( g != null ){
+            f = g.substring( 1, g.length() - 1 );
+        }
+    }
     Address( String a, String i, String f ){
         this.a = a;
         this.i = i;
         this.f = f;
-    }
-    Address( String adr ){
-        if( adr.isEmpty() )return;
-        int p = adr.indexOf( '(' );
-        if( p > -1 ) { // found
-            int q = adr.length() - 1;
-            if( adr.charAt( q ) != ')' ){
-                throw new Error( "boom" );
-            }
-            f = adr.substring( p + 1, q );
-        } else {
-            p = adr.length();
-        }
-        int c = adr.indexOf( ',' );
-        if( c > -1 ){ // checked
-            i = adr.substring( c + 1, p );
-        } else {
-            c = p;
-        }
-        a = adr.substring( 0, c );
     }
     @Override
     public String toString() {

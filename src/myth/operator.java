@@ -513,27 +513,36 @@ class Operator {
     // To continue program execution ONE SHOULD RE-ESTABLISH the
     // program counter pc from the jump register rJ when exiting
     // from a function, and jump to it.
-    void jump( int adr, boolean backup ) {
-        if( backup ){
-            vm.rJ.setvalue( Word.F( 0, 2 ), vm.pc + 1 );
-        }
-        vm.pc = adr - 1;
+    void backup() {
+        vm.rJ.setvalue( Word.F( 0, 2 ), vm.pc + 1 );
+    }
+    void setpc( int adr ){
+        vm.pc = adr - 1; // why is that?
+        // bcoz the cpu cycle will execute a jump and than
+        // increment the pc.
+    }
+    void jump( int adr ){
+        backup();
+        setpc( adr );
+    }
+    void jump_nobackup( int adr ){
+        setpc( adr );
     }
     class JMP implements Service {
         public void exec( int adr, int fld ){
-            jump( adr, true );
+            jump( adr );
         }
     }
     class JSJ implements Service { // First jump and than shoot!
         public void exec( int adr, int fld ){
-            jump( adr, false );
+            jump_nobackup( adr );
         }
     }
     class JOV implements Service {
         public void exec( int adr, int fld ){
             if( vm.overflowToggle ){
                 vm.overflowToggle = false;
-                jump( adr, true );
+                jump( adr );
             }
         }
     }
@@ -542,7 +551,51 @@ class Operator {
             if( vm.overflowToggle ){
                 vm.overflowToggle = false;
             } else {
-                jump( adr, true );
+                jump( adr );
+            }
+        }
+    }
+    class JL implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate == VM.LESS ){
+                jump( adr );
+            }
+        }
+    }
+    class JE implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate == VM.EQUAL ){
+                jump( adr );
+            }
+        }
+    }
+    class JG implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate == VM.GREATER ){
+                jump( adr );
+            }
+        }
+    }
+    class JGE implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate == VM.GREATER ||
+                vm.comparizonIndykate == VM.EQUAL ){
+                jump( adr );
+            }
+        }
+    }
+    class JNE implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate != VM.EQUAL ){
+                jump( adr );
+            }
+        }
+    }
+    class JLE implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.comparizonIndykate == VM.LESS ||
+                vm.comparizonIndykate == VM.EQUAL ){
+                jump( adr );
             }
         }
     }
@@ -627,7 +680,13 @@ class Operator {
         serv[ 39 ] = new ArrayList<>( asList( new JMP(),
                                               new JSJ(),
                                               new JOV(),
-                                              new JNOV() ));
+                                              new JNOV(),
+                                              new JL(),
+                                              new JE(),
+                                              new JG(),
+                                              new JGE(),
+                                              new JNE(),
+                                              new JLE() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){

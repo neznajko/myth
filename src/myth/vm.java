@@ -10,7 +10,7 @@ class Word {
     static final int BYTESIZ = 6; // nof bits
     static final int INTSIZ  = 32;
     static final long WORD_MASK = 0x000000003fffffffL; // fst 30 bits
-    //                            0xffffffffc0000000L
+    static final long OVERFLOW_MASK = ~WORD_MASK;
     // L:R = F = 8L + R
     static int L( int fld ){
         return fld / 8;
@@ -26,17 +26,7 @@ class Word {
     static final int INSTR_IDX = F( 3, 3 );
     static final int INSTR_FLD = F( 4, 4 );
     static final int INSTR_OPC = F( 5, 5 ); // opcode
-    boolean sign; // allowing for -0
-    long    bufr; // 64-bit, handles overflows, AX extended register
-    Word( boolean sign, long bufr ){ // no default constructor
-        this.sign = sign; // false is +
-        this.bufr = bufr; // this should be positive
-    }
-    Word( int value ){
-        sign = value < 0;
-        if( sign ) value = -value;
-        bufr = value;
-    }
+    //
     // fedcba9876543210fedcba9876543210
     // --______``````______``````______
     //   1     2     3     4     5
@@ -70,11 +60,31 @@ class Word {
         }
         return b.toString();
     }
+    boolean sign; // allowing for -0
+    long    bufr; // 64-bit, handles overflows, AX extended register
+    Word( boolean sign, long bufr ){
+        this.sign = sign; // false is +
+        this.bufr = bufr; // this should be positive
+    }
+    void setWord( long value )
+    {
+        sign = value < 0;
+        value = Math.abs( value );
+    }
+    Word( long value ){
+        setWord( value );
+    }
+    Word(){
+        this( 0 );
+    }
     int getfld( int left, int ryte ){
         long mask = getmask( left, ryte );
         int val = (int)(( bufr & mask ) >> getoff( ryte ));
         if( left == 0 && sign ) val = -val;
         return val;
+    }
+    int getfld( int fld ){
+        return getfld( L( fld ), R( fld ));
     }
     @Override
     public String toString() {
@@ -90,9 +100,7 @@ class Word {
         b.append( "[" + bufr + "]" );
         return b.toString();
     }
-    void setvalue( int fld, int value ){
-        int left = L( fld );
-        int ryte = R( fld );
+    void setvalue( int left, int ryte, int value ){
         if( left == 0 ){
             sign = value < 0;
             if( sign ) value = -value;
@@ -103,15 +111,22 @@ class Word {
         // set
         this.bufr |= value << getoff( ryte );
     }
-    Word getWord( int fld ){
-        int left = L( fld );
-        int ryte = R( fld );
+    void setvalue( int fld, int value ){
+        setvalue( L( fld ), R( fld ), value );
+    }
+    Word getWord( int left, int ryte ){
         boolean sign = false; // +
         if( left == 0 ){
             sign = this.sign;
             left = 1;
         }
         return new Word( sign, getfld( left, ryte ));
+    }
+    Word getWord( int fld ){
+        return getWord( L( fld ), R( fld ));
+    }
+    long getval() {
+        return sign ? -bufr : bufr;
     }
     void shiftleft( int n ){
         n *= BYTESIZ;
@@ -124,11 +139,6 @@ class Word {
     void div( long d ){
         bufr /= d;
     }
-    long getval() {
-        long val = bufr;
-        if( sign ) val = -val;
-        return val;
-    }
     static boolean overflow( long value ){
         // f - nibble
         // ff - byte
@@ -137,16 +147,14 @@ class Word {
         // ffff ffff ffff ffff - long
         // 0000 0000 3fff ffff - maximum value ( 30 bits )
         // ffff ffff c000 0000 - overflow mask
-        return ( value & 0xffffffffc0000000L ) > 0;
+        return ( value & OVERFLOW_MASK ) > 0;
     }
     void inc( final Word w ) throws Exception {
         long res = getval() + w.getval();
         if( overflow( res )){
             throw new Exception( "Overflow" );
         }
-        sign = res < 0;
-        if( sign ) res = -res;
-        bufr = res;
+        setWord( res );
     }
     void mul( final Word w ) throws Exception {
         long res = getval() * w.getval();
@@ -155,9 +163,7 @@ class Word {
         if(( res & 0xc000000000000000L ) > 0 ){
             throw new Exception( "Overflow" );
         }
-        sign = res < 0;
-        if( sign ) res = -res;
-        bufr = res;
+        setWord( res );
     }
     // Return the reminder, and replace with the quotent.
     long div( final Word w ) throws Exception {
@@ -171,10 +177,12 @@ class Word {
         }
         long r = Math.floorMod( x, y ); // remainder
         // epilogue
-        sign = q < 0;
-        if( sign ) q = -q;
-        bufr = q;
+        setWord( q );
         return r;
+    }
+    ////////////////////////////////////////////////////////////
+    boolean isNull() {
+        return ( bufr & WORD_MASK ) == 0;
     }
     ////////////////////////////////////////////////////////////////////
     // Check W-Value Component E1(F1),[E2(F2)],...,EN(FN)
@@ -208,11 +216,6 @@ class Word {
         }
         return ls;
     }
-    ////////////////////////////////////////////////////////////
-    boolean isNull() {
-        return ( bufr & WORD_MASK ) == 0;
-    }
-    ////////////////////////////////////////////////////////////
     ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
@@ -331,4 +334,4 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
+// log:
