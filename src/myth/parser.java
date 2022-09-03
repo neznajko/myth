@@ -18,9 +18,13 @@ class Address { // a,i(f)
     static Pattern pattern = Pattern.compile
         ( "([^,()]+)(,[^()]+)*(\\(.+\\))*" );
     // I could write a blog article explaining this regex.
+    // ([^,()]+) - This group is matching the a-part; at least
+    // one occurance of evrerything except ',', '(', or ')'
+    // (,[^()]+)* - This is for the ,i part
+    // (\\(.+\\))* - The (f) part, \\( and \\) are escaped (, and ).
     String a = "0";
     String i = "";
-    String f = "";
+    String f = ""; // Defaulf values on empty address
     //
     Address( String adr ){
         if( adr.isEmpty() ) return;
@@ -31,10 +35,10 @@ class Address { // a,i(f)
         a = matcher.group( 1 );
         String g = matcher.group( 2 );
         if( g != null ){
-            i = g.substring( 1 );
+            i = g.substring( 1 ); // discard ,
         }
         g = matcher.group( 3 );
-        if( g != null ){
+        if( g != null ){ // discard (, and )
             f = g.substring( 1, g.length() - 1 );
         }
     }
@@ -63,7 +67,7 @@ class Snapshot {
     Snapshot( int pc, String op, Address adr, boolean futureRef ){
         this.pc        = pc;
         this.op        = op;
-        this.adr      = adr;
+        this.adr       = adr;
         this.futureRef = futureRef;
     }
     @Override
@@ -159,7 +163,7 @@ class Parser { /////////////////////////////////////////////////
     ArrayList<Integer>[] lab = new ArrayList[ DIGITS ];
     ArrayList<Snapshot> timeshift;
     VM vm; // Virtual Machine
-    // Literal Constant to Address mapping
+    // Literal Constant to Address, mapping
     HashMap<String,String> litab;
     ////////////////////////////////////////////////////////////
     // Cons

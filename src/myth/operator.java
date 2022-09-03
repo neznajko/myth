@@ -599,6 +599,350 @@ class Operator {
             }
         }
     }
+    // JAN, JAZ, JAP, JANN, JANZ, JANP; C = 40, F = 0,1,2,3,4,5
+    class JAN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JAZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JAP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JANN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JANZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JANP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // JXN, JXZ, JXP, JXNN, JXNZ, JXNP; C = 47, F = 0,1,2,3,4,5
+    class JXN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JXZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JXP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JXNN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JXNZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class JXNP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J1N, J1Z, J1P, J1NN, J1NZ, J1NP; C = 41, F = 0,1,2,3,4,5
+    class J1N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J1Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J1P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J1NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J1NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J1NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J2N, J2Z, J2P, J2NN, J2NZ, J2NP; C = 42, F = 0,1,2,3,4,5
+    class J2N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J2Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J2P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J2NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J2NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J2NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J3N, J3Z, J3P, J3NN, J3NZ, J3NP; C = 43, F = 0,1,2,3,4,5
+    class J3N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J3Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J3P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J3NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J3NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J3NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J4N, J4Z, J4P, J4NN, J4NZ, J4NP; C = 44, F = 0,1,2,3,4,5
+    class J4N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J4Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J4P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J4NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J4NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J4NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J5N, J5Z, J5P, J5NN, J5NZ, J5NP; C = 45, F = 0,1,2,3,4,5
+    class J5N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J5Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J5P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J5NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J5NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J5NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    // J6N, J6Z, J6P, J6NN, J6NZ, J6NP; C = 46, F = 0,1,2,3,4,5
+    class J6N implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J6Z implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J6P implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false && vm.rA.bufr > 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J6NN implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign == false || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J6NZ implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.bufr != 0 ){
+                jump( adr );
+            }
+        }
+    }
+    class J6NP implements Service {
+        public void exec( int adr, int fld ){
+            if( vm.rA.sign || vm.rA.bufr == 0 ){
+                jump( adr );
+            }
+        }
+    }
     ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
@@ -687,6 +1031,55 @@ class Operator {
                                               new JGE(),
                                               new JNE(),
                                               new JLE() ));
+        serv[ 40 ] = new ArrayList<>( asList( new JAN(),
+                                              new JAZ(),
+                                              new JAP(),
+                                              new JANN(),
+                                              new JANZ(),
+                                              new JANP() ));
+        serv[ 47 ] = new ArrayList<>( asList( new JXN(),
+                                              new JXZ(),
+                                              new JXP(),
+                                              new JXNN(),
+                                              new JXNZ(),
+                                              new JXNP() ));
+        serv[ 41 ] = new ArrayList<>( asList( new J1N(),
+                                              new J1Z(),
+                                              new J1P(),
+                                              new J1NN(),
+                                              new J1NZ(),
+                                              new J1NP() ));
+        serv[ 42 ] = new ArrayList<>( asList( new J2N(),
+                                              new J2Z(),
+                                              new J2P(),
+                                              new J2NN(),
+                                              new J2NZ(),
+                                              new J2NP() ));
+        serv[ 43 ] = new ArrayList<>( asList( new J3N(),
+                                              new J3Z(),
+                                              new J3P(),
+                                              new J3NN(),
+                                              new J3NZ(),
+                                              new J3NP() ));
+        serv[ 44 ] = new ArrayList<>( asList( new J4N(),
+                                              new J4Z(),
+                                              new J4P(),
+                                              new J4NN(),
+                                              new J4NZ(),
+                                              new J4NP() ));
+        serv[ 45 ] = new ArrayList<>( asList( new J5N(),
+                                              new J5Z(),
+                                              new J5P(),
+                                              new J5NN(),
+                                              new J5NZ(),
+                                              new J5NP() ));
+        serv[ 46 ] = new ArrayList<>( asList( new J6N(),
+                                              new J6Z(),
+                                              new J6P(),
+                                              new J6NN(),
+                                              new J6NZ(),
+                                              new J6NP() ));
+        // Lots of Copy and Paste!
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
