@@ -944,6 +944,59 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
+    // Shift Operators: SLA, SRA, SLAX, SRAX, SLC, SRC
+    // C = 6, F = 0, 1, 2, 3, 4, 5
+    ////////////////////////////////////////////////////////////
+    class SLA implements Service {
+        public void exec( int adr, int fld ){
+            vm.rA.shiftleft( adr );
+        }
+    }
+    class SRA implements Service {
+        public void exec( int adr, int fld ){
+            vm.rA.shiftryte( adr );
+        }
+    }
+    // make rX buffer extended rAX
+    void preshift() {
+        vm.rA.shiftleft( Word.BYTES );
+        vm.rX.bufr |= vm.rA.bufr;
+    }
+    // re-establish
+    void postshift() {
+        vm.rA.bufr = vm.rX.bufr; // copy
+        vm.rA.shiftryte( Word.BYTES ); // rA
+        vm.rX.bufr &= Word.WORD_MASK;  // rX
+    }
+    class SLAX implements Service {
+        public void exec( int adr, int fld ){
+            preshift();
+            vm.rX.shiftleft( adr );
+            postshift();
+        }
+    }
+    class SRAX implements Service {
+        public void exec( int adr, int fld ){
+            preshift();
+            vm.rX.shiftryte( adr );
+            postshift();
+        }
+    }
+    class SLC implements Service {
+        public void exec( int adr, int fld ){
+            preshift();
+            vm.rX.cycle( 10 - adr );
+            postshift();
+        }
+    }
+    class SRC implements Service {
+        public void exec( int adr, int fld ){
+            preshift();
+            vm.rX.cycle( adr );
+            postshift();
+        }
+    }
+    ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
     //                                                     .tnem-
@@ -1080,6 +1133,12 @@ class Operator {
                                               new J6NZ(),
                                               new J6NP() ));
         // Lots of Copy and Paste!
+        serv[ 6 ] = new ArrayList<>( asList( new SLA(),
+                                             new SRA(),
+                                             new SLAX(),
+                                             new SRAX(),
+                                             new SLC(),
+                                             new SRC() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -1100,16 +1159,18 @@ class Operator {
         var vm = new VM();
         var op = new Operator( vm );
         // testing...
-        int adr = 0;
-        int fld = Word.F( 0, 5 );
-        Word w = vm.memory[ adr ];
-        w.setvalue( fld, 200 );
-        Word reg = vm.rI[0];
-        reg.setvalue( fld, 199 );
-        op.exec( adr, fld, 56 ); // CMPA
-        vm.dumpMemory( 0, 5 );
-        out.println( reg );
-        out.println( vm.comparizonIndykate );
+        int adr = 1;
+        int fld = 4;
+        int code = 6;
+        //
+        vm.rA.setvalue( Word.F( 0, 5 ), 13 );
+        vm.rX.setvalue( Word.F( 0, 5 ), -24 );
+        vm.rX.setvalue( Word.F( 1, 1 ), 35 );
+        out.println( vm.rA );
+        out.println( vm.rX );
+        op.exec( adr, fld, code ); // SLC
+        out.println( vm.rA );
+        out.println( vm.rX );
         //
     }
 }

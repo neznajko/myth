@@ -63,7 +63,7 @@ class Snapshot {
     int     pc;
     String  op;
     Address adr;
-    boolean futureRef; // if false a-part is literal
+    boolean futureRef; // if false adr's a-part is a literal
     Snapshot( int pc, String op, Address adr, boolean futureRef ){
         this.pc        = pc;
         this.op        = op;

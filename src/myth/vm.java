@@ -109,7 +109,11 @@ class Word {
         // clear
         this.bufr &= ~mask;
         // set
-        this.bufr |= value << getoff( ryte );
+        int off = getoff( ryte );
+        // casting to long allows to use the negative bytes,
+        // for the SLC command etc.
+        long shifted = ( long )value << getoff( ryte );
+        this.bufr |= shifted;
     }
     void setvalue( int fld, int value ){
         setvalue( L( fld ), R( fld ), value );
@@ -184,6 +188,36 @@ class Word {
     boolean isNull() {
         return ( bufr & WORD_MASK ) == 0;
     }
+    ////////////////////////////////////////////////////////////////
+    //                    2                   1
+    //  9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+    // , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,
+    // :           :           :           :           :           :
+    //       1           2           3           4           5
+//  111111 000000 000000 000000 000000 000000 000000 000000 000000 000000
+//  -4     -3     -2     -1     0      1      2      3      4      5
+//     
+    void reverse( int left, int ryte ){
+        // bcoz of the getfld make temporary the word positive
+        boolean backup = sign;
+        sign = false;
+        for(; left < ryte; left++, ryte-- ){
+            int left_value = getfld( left, left );
+            int ryte_value = getfld( ryte, ryte );
+            setvalue( left, left, ryte_value );
+            setvalue( ryte, ryte, left_value );
+        }
+        // re-establish
+        sign = backup;
+    }
+    void cycle( int n ){
+        n %= 2*BYTES;
+        if( n == 0 ) return;
+        n -= 5;
+        reverse( -4, 5 );
+        reverse( -4, n );
+        reverse( n + 1, 5 );
+    }
     ////////////////////////////////////////////////////////////////////
     // Check W-Value Component E1(F1),[E2(F2)],...,EN(FN)
     static Pair<String,String> checkWalueComp( String walueComp ){
@@ -216,24 +250,30 @@ class Word {
         }
         return ls;
     }
+    String toBinaryString() {
+        String s = Long.toBinaryString( bufr );
+        s = new StringBuilder( s ).reverse().toString();
+        s = s.replaceAll( "(.{6})", "$1 " );
+        s = new StringBuilder( s ).reverse().toString();
+        return s;
+    }
     ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
         Word w = new Word( false , 0 );
-        w.setvalue( 2, -15 );
-        out.println( w );
-        w.shiftryte( 1 );
-        out.println( w );
-        Word x = new Word( false, 0 );
-        x.setvalue( 45, 63 );
-        out.println( x );
-        try {
-            long r = w.div( x );
-            out.println( w );
-            out.println( r );
-        } catch( Exception e ){
-            out.println( e );
-        }
+        w.setvalue( -4, -4, 1  );
+        w.setvalue( -3, -3, 2  );
+        w.setvalue( -2, -2, 3  );
+        w.setvalue( -1, -1, 4  );
+        w.setvalue(  0,  0, 5  );
+        w.setvalue(  1,  1, 6  );
+        w.setvalue(  2,  2, 7  );
+        w.setvalue(  3,  3, 8  );
+        w.setvalue(  4,  4, 9  );
+        w.setvalue(  5,  5, 10 );
+        out.println( w.toBinaryString());
+        w.cycle( 5 );
+        out.println( w.toBinaryString());
     }                     
 }
 ////////////////////////////////////////////////////////////////
