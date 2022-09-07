@@ -6,6 +6,8 @@ import static java.util.Arrays.asList;
 ////////////////////////////////////////////////////////////////
 import java.util.ArrayList;
 ////////////////////////////////////////////////////////////////
+class KeineBewegung extends RuntimeException {}
+////////////////////////////////////////////////////////////////
 class Operator {
     static final int NO_SERVICES = 64;
     VM vm;
@@ -997,6 +999,26 @@ class Operator {
         }
     }
     ////////////////////////////////////////////////////////////
+    class MOVE implements Service {
+        public void exec( int adr, int fld ){
+            int dest = vm.rI[ 0 ].getfld( 5 );
+            for(; fld--> 0; dest++, adr++ ){
+                vm.memory[ dest ].copyOf( vm.memory[ adr ] );
+            }
+            vm.rI[ 0 ].setvalue( 5, dest );
+        }
+    }
+    class NOP implements Service {
+        public void exec( int adr, int fld ){
+            // Muahaha
+        }
+    }
+    class HLT implements Service { // Alarm!
+        public void exec( int adr, int fld ) {
+            throw new KeineBewegung();
+        }
+    }
+    ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
     //                                                     .tnem-
@@ -1139,6 +1161,9 @@ class Operator {
                                              new SRAX(),
                                              new SLC(),
                                              new SRC() ));
+        serv[ 7 ] = new ArrayList<>( asList( new MOVE() ));
+        serv[ 0 ] = new ArrayList<>( asList( new NOP() ));
+        serv[ 5 ] = new ArrayList<>( asList( new HLT() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -1161,16 +1186,17 @@ class Operator {
         // testing...
         int adr = 1;
         int fld = 4;
-        int code = 6;
+        int code = 7;
+        vm.rI[ 0 ].setvalue( 5, 6 );
+        vm.memory[ 1 ].setvalue( 5, 1 );
+        vm.memory[ 2 ].setvalue( 5, 2 );
+        vm.memory[ 3 ].setvalue( 5, 3 );
+        vm.memory[ 4 ].setvalue( 5, 4 );
+        vm.dumpMemory( 0, 10 );
         //
-        vm.rA.setvalue( Word.F( 0, 5 ), 13 );
-        vm.rX.setvalue( Word.F( 0, 5 ), -24 );
-        vm.rX.setvalue( Word.F( 1, 1 ), 35 );
-        out.println( vm.rA );
-        out.println( vm.rX );
-        op.exec( adr, fld, code ); // SLC
-        out.println( vm.rA );
-        out.println( vm.rX );
+        op.exec( adr, fld, code );
+        //
+        vm.dumpMemory( 0, 10 );
         //
     }
 }

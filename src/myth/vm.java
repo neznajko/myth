@@ -60,6 +60,7 @@ class Word {
         }
         return b.toString();
     }
+    ////////////////////////////////////////////////////////////
     boolean sign; // allowing for -0
     long    bufr; // 64-bit, handles overflows, AX extended register
     Word( boolean sign, long bufr ){
@@ -69,7 +70,7 @@ class Word {
     void setWord( long value )
     {
         sign = value < 0;
-        value = Math.abs( value );
+        bufr = Math.abs( value );
     }
     Word( long value ){
         setWord( value );
@@ -77,6 +78,11 @@ class Word {
     Word(){
         this( 0 );
     }
+    void copyOf( Word w ){
+        sign = w.sign;
+        bufr = w.bufr;
+    }
+    ////////////////////////////////////////////////////////////    
     int getfld( int left, int ryte ){
         long mask = getmask( left, ryte );
         int val = (int)(( bufr & mask ) >> getoff( ryte ));
@@ -260,20 +266,12 @@ class Word {
     ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
-        Word w = new Word( false , 0 );
-        w.setvalue( -4, -4, 1  );
-        w.setvalue( -3, -3, 2  );
-        w.setvalue( -2, -2, 3  );
-        w.setvalue( -1, -1, 4  );
-        w.setvalue(  0,  0, 5  );
-        w.setvalue(  1,  1, 6  );
-        w.setvalue(  2,  2, 7  );
-        w.setvalue(  3,  3, 8  );
-        w.setvalue(  4,  4, 9  );
-        w.setvalue(  5,  5, 10 );
-        out.println( w.toBinaryString());
-        w.cycle( 5 );
-        out.println( w.toBinaryString());
+        Word w = new Word( -12345 );
+        Word v = new Word( 7891234 );
+        out.println( w );
+        out.println( v );
+        v.copyOf( w );
+        out.println( v );
     }                     
 }
 ////////////////////////////////////////////////////////////////
