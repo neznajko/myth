@@ -67,13 +67,13 @@ class Word {
         this.sign = sign; // false is +
         this.bufr = bufr; // this should be positive
     }
-    void setWord( long value )
+    void setword( long value )
     {
         sign = value < 0;
         bufr = Math.abs( value );
     }
     Word( long value ){
-        setWord( value );
+        setword( value );
     }
     Word(){
         this( 0 );
@@ -164,7 +164,7 @@ class Word {
         if( overflow( res )){
             throw new Exception( "Overflow" );
         }
-        setWord( res );
+        setword( res );
     }
     void mul( final Word w ) throws Exception {
         long res = getval() * w.getval();
@@ -173,7 +173,7 @@ class Word {
         if(( res & 0xc000000000000000L ) > 0 ){
             throw new Exception( "Overflow" );
         }
-        setWord( res );
+        setword( res );
     }
     // Return the reminder, and replace with the quotent.
     long div( final Word w ) throws Exception {
@@ -187,7 +187,7 @@ class Word {
         }
         long r = Math.floorMod( x, y ); // remainder
         // epilogue
-        setWord( q );
+        setword( q );
         return r;
     }
     ////////////////////////////////////////////////////////////
@@ -223,38 +223,6 @@ class Word {
         reverse( -4, 5 );
         reverse( -4, n );
         reverse( n + 1, 5 );
-    }
-    ////////////////////////////////////////////////////////////////////
-    // Check W-Value Component E1(F1),[E2(F2)],...,EN(FN)
-    static Pair<String,String> checkWalueComp( String walueComp ){
-        String E, // expression
-               F; // field
-        int i = walueComp.indexOf( '(' );
-        if( i == -1 ){ // not found, use default field
-            E = walueComp;
-            F = "0:5";
-        } else {
-            E = walueComp.substring( 0, i );
-            int j = walueComp.length() - 1;
-            if( walueComp.charAt( j ) != ')' ){
-                throw new Error( "Unbalanced parens:)" );
-            }
-            F = walueComp.substring( i + 1, j );
-        }
-        return new Pair<>( E, F );
-    }
-    // E1(F1),E2(F2),...,EN(FN)
-    static ArrayList<Pair<String,String>> walueSplit( String walue ){
-        var ls = new ArrayList<Pair<String,String>>();
-        String walueComp; // W-Value Component
-        walue += ",";     // make it simple
-        int j = 0;        // position of next ','
-        for( int i = 0; i < walue.length(); i = j + 1 ){
-            j = walue.indexOf( ',', i );
-            walueComp = walue.substring( i, j );
-            ls.add( checkWalueComp( walueComp ));
-        }
-        return ls;
     }
     String toBinaryString() {
         String s = Long.toBinaryString( bufr );

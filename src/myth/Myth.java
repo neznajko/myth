@@ -361,4 +361,4 @@ public class Myth {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log:
+// log: -Rethink the Token class, there are lot of repetitions.

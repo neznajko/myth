@@ -13,34 +13,21 @@ import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 // All evaluations are within Parser because of symbol table and
 // program counter, not to mention the lab arrays, zo all fields
-// for that reason are strings. 
+// for that reason are strings.
 class Address { // a,i(f)
-    static Pattern pattern = Pattern.compile
-        ( "([^,()]+)(,[^()]+)*(\\(.+\\))*" );
-    // I could write a blog article explaining this regex.
-    // ([^,()]+) - This group is matching the a-part; at least
-    // one occurance of evrerything except ',', '(', or ')'
-    // (,[^()]+)* - This is for the ,i part
-    // (\\(.+\\))* - The (f) part, \\( and \\) are escaped (, and ).
-    String a = "0";
-    String i = "";
-    String f = ""; // Defaulf values on empty address
+    static final Pattern PATTERN = Pattern.compile
+        ( "^(=.+=|[^,()]+)(,([^()])+)*(\\((.+)\\))*$" );
+    String a;
+    String i;
+    String f; 
     //
     Address( String adr ){
-        if( adr.isEmpty() ) return;
-        Matcher matcher = pattern.matcher( adr );
-        if(! matcher.find()) {
-            throw new Error( "regex" );
-        }
+        if( adr.isEmpty()) return;
+        Matcher matcher = PATTERN.matcher( adr );
+        if( !matcher.find()) throw new Error( "regex" );
         a = matcher.group( 1 );
-        String g = matcher.group( 2 );
-        if( g != null ){
-            i = g.substring( 1 ); // discard ,
-        }
-        g = matcher.group( 3 );
-        if( g != null ){ // discard (, and )
-            f = g.substring( 1, g.length() - 1 );
-        }
+        i = matcher.group( 3 );
+        f = matcher.group( 5 );
     }
     Address( String a, String i, String f ){
         this.a = a;
@@ -49,7 +36,7 @@ class Address { // a,i(f)
     }
     @Override
     public String toString() {
-        return "[" + a + "," + i + "(" + f + ")]";
+        return "(" + a + "){" + i + "}[" + f + "]";
     }
     public static void main( String args[]) {
         var adr = new Address( args[0] );
@@ -83,17 +70,9 @@ class Snapshot {
 }
 //```` | {@@|  :@@;  }@@             | _ _ | _ _ _ _ _ _ _ _ _ _
 class Parser { /////////////////////////////////////////////////
-    // Number of local symbol labels.
-    static final int DIGITS = 10;
-    // Label's type.
-    enum Lab {
-        NOPE, // YEEA
-        BKWD, // 3B
-        HERE, // 1H
-        FRWD, // 2F
-    };
-    // Label to program counter error handling pair.
-    static final Pair<Lab,Integer> LABERR = new Pair<>( Lab.NOPE, -1 );
+    static final int DIGITS = 10; // local symbol labels.
+    static final Pattern LABPAT = Pattern.compile( "^\\d[HBF]$" );
+    //
     static HashMap<Character,Integer> charmap;
     static {
         charmap = new HashMap<>();
@@ -154,6 +133,7 @@ class Parser { /////////////////////////////////////////////////
         charmap.put(  ':', 54 );
         charmap.put( '\'', 55 );
     }
+    //
     // This is the famous Symbol Table.
     HashMap<String,Integer> tab;
     // The program counter.
@@ -165,115 +145,115 @@ class Parser { /////////////////////////////////////////////////
     VM vm; // Virtual Machine
     // Literal Constant to Address, mapping
     HashMap<String,String> litab;
+    Walue walue;
     ////////////////////////////////////////////////////////////
     // Cons
     Parser(){
         tab = new HashMap<>();
-        pc = 0;
+        pc = -1;
         for( int j = 0; j < DIGITS; j++ ){
             lab[ j ] = new ArrayList<>();
         }
         timeshift = new ArrayList<>();
         vm = new VM();
         litab = new HashMap<>();
+        walue = new Walue( this );
     }
     ////////////////////////////////////////////////////////////
     // Check if token tok is in the form dB, dH, or dF,
     // where d is 0-9 digit.
-    static Pair<Lab,Integer> checkLab( String tok ){
-        if( tok.length() != 2 ||
-            false == Espresso.isDigit( tok.charAt( 0 ))){
-            return LABERR;
+    static Pair<Character,Integer> checkLab( String tok ){
+        if( !LABPAT.matcher( tok ).find()) {
+            throw new RuntimeException( "labpat" );
         }
-        int d = tok.charAt( 0 ) - '0';
-        switch( tok.charAt( 1 )){
-            case 'B': return new Pair<>( Lab.BKWD, d );
-            case 'H': return new Pair<>( Lab.HERE, d );
-            case 'F': return new Pair<>( Lab.FRWD, d );
-        }
-        return LABERR;
+        return new Pair<>( tok.charAt( 1 ),
+                           tok.charAt( 0 ) - '0' );
     }
     ////////////////////////////////////////////////////////////
-    // Check the correctness of the LOC field. On error return 
-    // -1, if label return its number(0-9), otherwise return 10.
+    // Check the correctness of the LOC field. On error throw an 
+    // Error, if it's a local label return its number, otherwise
+    // if it's normal label return -1.
     static int checkLoc( String loc ){
         var espresso = new Espresso( loc ).Analyze();
-        if( espresso.size() != 1 ) return -1;
-        var tok = espresso.get( 0 );
-        if( tok.key != Token.Type.SAMBO ) return -1;
-        // Check if local symbol, dH, etc.
-        var p = checkLab( tok.value );
-        if( p.x == Lab.HERE ){
-            return p.y;
-        } else if( p.x == Lab.NOPE ){
-            return DIGITS;
+        if( espresso.size() != 1 ){
+            throw new Error( "what is this?" );
         }
-        return -1;
+        var tok = espresso.get( 0 );
+        if( tok.key != Token.Type.SAMBO ){
+            throw new Error
+                ( "If you want to be like Rambo, train Sambo." );
+        }
+        // Check if local symbol, dH, etc.
+        try {
+            var p = checkLab( tok.value );
+            if( p.x == 'H' ) return p.y;
+        } catch( Throwable t ){
+            return -1;
+        }
+        throw new Error( "ö_Ò" );
     }
     ////////////////////////////////////////////////////////////
     // Print for debugging and stuff.
     @Override
     public String toString() {
         var b = new StringBuilder();
-        b.append( "tab: " + tab.toString() );
+        b.append( "tab: " + tab.toString());
         b.append( "\npc: " + pc );
         for( int j = 0; j < DIGITS; j++ ){
             b.append( "\n" + j + ": " );
-            b.append( Arrays.toString( lab[ j ].toArray() ));
+            b.append( Arrays.toString( lab[j].toArray()));
         }
         b.append( "\ntimeshift: " +
-                  Arrays.toString( timeshift.toArray() )); 
+                  Arrays.toString( timeshift.toArray()));
+        b.append( "\nlitab: " + litab.toString());
         return b.toString();
     }
     ////////////////////////////////////////////////////////////
-    int getTokenValue( Token tok ) throws Exception {
-        int val;
-        if( tok.key == Token.Type.OPERA ){ //              OPERA
-            throw new Error( tok.toString());
-        } else if( tok.key == Token.Type.NAMBA ){ //       NAMBA
-            val = Integer.parseInt( tok.value );
-        } else if( tok.key == Token.Type.ASTER ){ //       ASTER
-            val = pc;
-        } else {
-            // Check vhether it's backward local symbol.
-            final var ck = checkLab( tok.value );
-            if( ck.x == Lab.BKWD ){ // tok.value: 2B
-                final int n = ck.y; // n: 2
-                final int back = lab[ n ].size() - 1;
-                final int mostRecent = lab[ n ].get( back );
-                if( pc == mostRecent ){
-                    throw new Error( "Not backward compatible!" );
+    int getTokenValue( Token tok ){
+        String value = tok.value;
+        switch( tok.key ){
+        case NAMBA: return Integer.parseInt( value );
+        case ASTER: return pc;
+        case SAMBO:
+            // Check vhether it's backward local label.
+            try {
+                var p = checkLab( value );
+                switch( p.x ){
+                case 'H': break;
+                case 'B':
+                    int n = lab[ p.y ].size();
+                    return lab[ p.y ].get( n - 1 );
+                case 'F': // Future Reference
+                    throw new RuntimeException( value );
                 }
-                val = mostRecent;
-            } else {
-                if(! tab.containsKey( tok.value )){ // SAMBO
+            } catch( RuntimeException e ){
+                if( tab.containsKey( value )){
+                    return tab.get( value );
+                } else {
                     // Ok Future Reference / Literal Constant
-                    throw new Exception( tok.toString());
+                    throw new RuntimeException( value );
                 }
-                val = tab.get( tok.value );
             }
         }
-        return val;
+        throw new Error( "haha" );
     }
     ////////////////////////////////////////////////////////////
     // coffee:
     // <opera,-><namba,5><opera,+><aster,*><opera,-><sambo,2B>
-    int eval( ArrayList<Token> coffee ) throws Exception {
+    int eval( ArrayList<Token> coffee ) throws RuntimeException {
         // Get first the sign if present, and then othr operatrs
         // the evaluation is straight from left to right e.g.:
-        // -8+1/2+3-2 evaluates to -7/2+3-2 = -3+3-2 = 0-2 = -2
+        // -8+1/2+3-2 evaluates to -2
         boolean sign = false;
         Token tok = coffee.get( 0 );
-        int n = coffee.size();
         int j = 0; 
         if( tok.key == Token.Type.OPERA ){
-            if( tok.value.equals( "-" )){
-                sign = true;
-                j = 1;
-            } else if( tok.value.equals( "+" )){
-                j = 1;
-            } else {
-                throw new Error( tok.toString());
+            switch( tok.value.charAt( 0 )){
+            case '-': sign = true;
+            case '+':
+                ++j;
+                break;
+            default: throw new Error( tok.toString());
             }
         }
         // check here coffee's length
@@ -283,13 +263,15 @@ class Parser { /////////////////////////////////////////////////
         // b) sign
         // -3/5*7-*: 7 - 1 + 1 = 7 is not even!
         // 01234567
-        if( 0 == (( n - j ) & 1 )){ // Check the odd bit
+        int n = coffee.size();
+        if((( n - j ) & 1 ) == 0 ){ // Check the odd bit
             throw new Error( "Expression!" );
         }
         // initialize return value
         tok = coffee.get( j );
-        int rv = getTokenValue( tok );
-        if( sign ) rv = -rv;
+        int res;
+        res = getTokenValue( tok );
+        if( sign ) res = -res;
         // -5+3//HAHA-8**
         for( j++, n--; j < n; j += 2 ){
             tok = coffee.get( j );
@@ -304,70 +286,42 @@ class Parser { /////////////////////////////////////////////////
             }
             int val = getTokenValue( tok );
             if( op.equals( "-" )){
-                rv -= val;
+                res -= val;
             } else if( op.equals( "+" )){
-                rv += val;
+                res += val;
             } else if( op.equals( "*" )){
-                rv *= val;
+                res *= val;
             } else if( op.equals( "/" )){
-                rv /= val;
+                res /= val;
             } else if( op.equals( "//" )){
-                Word w = new Word( rv < 0, rv );
+                Word w = new Word( res );
                 w.shiftleft( Word.BYTES );
                 w.div( val );
-                rv = (int) w.bufr;
-                if( w.sign ) rv = -rv;
+                res = w.getfld( 0, Word.BYTES );
             } else if( op.equals( ":" )){
-                rv *= 8;
-                rv += val;
+                res *= 8;
+                res += val;
             } else {
                 throw new Error( ";)" );
             }
         }
-        return rv;
+        return res;
     }
     ////////////////////////////////////////////////////////////
-    static boolean checkField( int F ){
-        if( F < 0 )return false; 
-        // F = 8L + R
-        int L = F/8;
-        int R = F%8;
-        if( L > 5 )return false;
-        if( R > 5 )return false;
-        return true;
-    }
-    ////////////////////////////////////////////////////////////
-    Word evalWalue( String walue ){
-        Word w = new Word( false, 0 );
-        try {
-            for( final var walueComp: Word.walueSplit( walue )){
-                // Here walueComp is an <E,F> pair.
-                int F = eval( new Espresso( walueComp.y ).Analyze());
-                if(! checkField( F )){
-                    throw new Error( "Not valid field" );
-                }
-                int E = eval( new Espresso( walueComp.x ).Analyze());
-                w.setvalue( F, E ); 
-            }
-        } catch (Exception e ) {
-            throw new Error( "Alarm!" );
-        }
-        return w;
-    }
-    ////////////////////////////////////////////////////////////
+    // =abcdefghij=
+    // 0123456789ab
     String isLiteral( String a ){
-        final int n = a.length();
-        if( a.charAt(0)     == '=' &&
-            a.charAt(n - 1) == '=' ){
-            String e = a.substring( 1, n - 1 ); // discard ='s
-            if( e.length() >= DIGITS ){
-                throw new Error( "long long long is too long for gcc" );
-            }
-            Word w = evalWalue( e );
-            int val = w.getfld( 0, Word.BYTES );
-            return String.valueOf( val );
+        if( a == null ) return ""; // n.o p
+        int b = a.length() - 1; // back
+        if( b > DIGITS + 1 ){
+            throw new Error( "That's too long even for gcc, I guess." );
         }
-        return ""; // nope
+        if( a.charAt(0) != '=' || a.charAt(b) != '=' ){
+            return ""; // nope
+        }
+        a = a.substring( 1, b ); // discard ='s
+        return String.valueOf( walue.ewal(a).getval());
+        // 4 values:  1        2     3          4
     }
     ////////////////////////////////////////////////////////////
     // Pass a-field string, obtained from Address constructor,
@@ -377,12 +331,12 @@ class Parser { /////////////////////////////////////////////////
     // result, otherwise return the expression's evaluation.
     ////////////////////////////////////////////////////////////
     int isFutureRef( String a ){
-        if( a.isEmpty()) return 0;
-        final var coffee = new Espresso( a ).Analyze();
+        if( a == null ) return 0;
+        var coffee = new Espresso(a).Analyze();
         int val = Integer.MAX_VALUE;
         try {
             val = eval( coffee );
-        } catch ( Exception e ){
+        } catch( RuntimeException e ){
             if( coffee.size() > 1 ){
                 throw new Error( "Future Reference" );
             }
@@ -391,33 +345,30 @@ class Parser { /////////////////////////////////////////////////
     }
     ////////////////////////////////////////////////////////////
     // called by firstPass
-    void asm( String op, final Address adr ) throws Exception {
+    void asm( String op, Address adr ){
         // check if a-Part is Literal
         String a = isLiteral( adr.a );
-        if(! a.isEmpty()) { // literal constant
-            Address adr1 = new Address( a, adr.i, adr.f );
-            timeshift.add( new Snapshot( pc, op, adr1, false ));
+        if( !a.isEmpty()) { // literal constant
+            adr = new Address( a, adr.i, adr.f );
+            timeshift.add( new Snapshot( pc, op, adr, false ));
             return;
         }
         // evaluate a-Part
         int aval = isFutureRef( adr.a );
-        if( aval == Integer.MAX_VALUE ){
-            // Future refernce
+        if( aval == Integer.MAX_VALUE ){ // Future refernce
             timeshift.add( new Snapshot( pc, op, adr, true ));
             return;
         }
         ////////////////////////////////////////////////////////        
         // evaluate i,f-parts
-        int ival = 0;
-        if(! adr.i.isEmpty() ){
-            ival = eval( new Espresso( adr.i ).Analyze());
-        }
-        final var instr = Instruction.map.get( op );
+        int ival = ( adr.i == null
+                     ? 0
+                     : eval( new Espresso( adr.i ).Analyze()));
+        var instr = Instruction.map.get( op );
         int code = instr.x;
-        int fld  = instr.y; // default
-        if(! adr.f.isEmpty() ){
-            fld = eval( new Espresso( adr.f ).Analyze());
-        }
+        int fld  = ( adr.f == null
+                     ? instr.y
+                     : eval( new Espresso( adr.f ).Analyze()));
         Word w = vm.memory[ pc ];
         w.setvalue( Word.INSTR_ADR, aval ); // 0:2
         w.setvalue( Word.INSTR_IDX, ival ); // 3:3
@@ -425,96 +376,59 @@ class Parser { /////////////////////////////////////////////////
         w.setvalue( Word.INSTR_OPC, code ); // 5:5
     }
     ////////////////////////////////////////////////////////////
-    // Assembly involving literal constant
-    void asmli( Snapshot cheese ){
-        var adr = cheese.adr;
-        if( litab.containsKey( adr.a )){
-            adr.a = litab.get( adr.a );
-        } else {
-            Word w = vm.memory[ vm.end ];
-            w.setvalue( 5, Integer.valueOf( adr.a ));
-            String a = String.valueOf( vm.end++ );
-            litab.put( adr.a, a );
-            adr.a = a;
+    static Word encode( String alf ){
+        int n = alf.length();
+        if( n > Word.BYTES ) throw new Error( "encode" );
+        Word w = new Word();
+        for( int j = 1; j <= n; ++j ){
+            w.setvalue( Word.F( j, j ),
+                        charmap.get( alf.charAt(j - 1)));
         }
-        // assemble the instruction at cheese.pc here
-        int backup = pc;
-        pc = cheese.pc;
-        try {
-            asm( cheese.op, adr );
-        } catch( Exception e ){
-            throw new Error( "Literal Assembly" );
-        }
-        pc = backup;
+        return w;
     }
     ////////////////////////////////////////////////////////////
-    void encode( String alf ){
-        final int n = alf.length();
-        if( n > Word.BYTES ){
-            throw new Error( "encode" );
-        }
-        Word w = new Word( false, 0 );
-        for( int j = 0; j < n; ++j ){
-            w.setvalue( Word.F( j + 1, j + 1 ),
-                        charmap.get( alf.charAt( j )));
-        }
-        vm.memory[ pc ] = w;
-    }
-    ////////////////////////////////////////////////////////////
-    // log: 0
     void firstPass( String fileName ) throws Exception {
         Skanner ska = new Skanner( fileName );
         while( ska.getnext()) {
-            out.print( pc + ": " + ska );
+            pc++;
             // LOC
-            if( ska.loc.isEmpty() == false ){
+            if( !ska.loc.isEmpty()) {
                 int d = checkLoc( ska.loc );
-                if( d == -1 ){
-                    throw new Error( "LOC" );
-                } else if( d == DIGITS ){
-                    tab.put( ska.loc, pc );
-                } else {
-                    lab[ d ].add( pc );
-                }
+                if( d >= 0 ) lab[ d ].add( pc );
+                else tab.put( ska.loc, pc );
             }
             // OP
+            if( ska.op.isEmpty()) continue;
             Word w;
-            if( ska.op.isEmpty() == false ){
-                switch( checkOp( ska.op )) {
-                case MIX:
-                    asm( ska.op, new Address( ska.adr ));
-                    break;
-                case EQU:
-                    w = evalWalue( ska.adr );
-                    tab.put( ska.loc, w.getfld( 0, Word.BYTES ));
-                    pc--;
-                    break;
-                case ORIG:
-                    w = evalWalue( ska.adr );
-                    pc = w.getfld( 0, Word.BYTES ) - 1;
-                    break;
-                case CON:
-                    w = evalWalue( ska.adr );
-                    vm.memory[ pc ] = w;
-                    break;
-                case ALF:
-                    // log: allow spaces to appear in ska.adr
-                    encode( ska.adr );
-                    break;
-                case END:
-                    vm.end = pc;
-                    break;
-                case NOPE:
-                    throw new Error( "8/" );
-                default:
-                    break;  
-                }
+            switch( getop( ska.op )) {
+            case MIX:
+                asm( ska.op, new Address( ska.adr ));
+                break;
+            case EQU:
+                w = walue.ewal( ska.adr );
+                tab.put( ska.loc, (int) w.getval());
+                pc--;
+                break;
+            case ORIG:
+                w = walue.ewal( ska.adr );
+                pc = (int) w.getval() - 1;
+                break;
+            case CON:
+                w = walue.ewal( ska.adr );
+                vm.memory[ pc ] = w;
+                break;
+            case ALF:
+                vm.memory[ pc ] = encode( ska.adr );
+                break;
+            case END:
+                vm.end = pc;
+                break;
+            default: throw new Error( "8/" );
             }
-            pc++;
         }
     }
     ////////////////////////////////////////////////////////////
-    enum Op {
+    enum Optype {
         NOPE, // Error 
         MIX,  // MIX Instruction
         EQU,  // mixal pseudo instructions
@@ -524,45 +438,47 @@ class Parser { /////////////////////////////////////////////////
         END,  //
     };
     ////////////////////////////////////////////////////////////
-    static Op checkOp( String op ){
-        if( Instruction.map.containsKey( op )){
-            return Op.MIX;
+    static Optype getop( String op ){
+        if( Instruction.map.containsKey( op )) return Optype.MIX;
+        if( op.equals( "EQU" ))  return Optype.EQU;
+        if( op.equals( "ORIG" )) return Optype.ORIG;
+        if( op.equals( "CON" ))  return Optype.CON;
+        if( op.equals( "ALF" ))  return Optype.ALF;
+        if( op.equals( "END" ))  return Optype.END;
+        return Optype.NOPE;
+    }
+    ////////////////////////////////////////////////////////////
+    // Assembly involving literal constant
+    void asmli( Snapshot cheese ){
+        var adr = cheese.adr;
+        if( litab.containsKey( adr.a )){
+            adr.a = litab.get( adr.a );
+        } else {
+            Word w = vm.memory[ vm.end ];
+            w.setword( Long.valueOf( adr.a ));
+            String a = String.valueOf( vm.end++ );
+            litab.put( adr.a, a );
+            adr.a = a;
         }
-        if( op.equals( "EQU" )){
-            return Op.EQU;
-        }
-        if( op.equals( "ORIG" )){
-            return Op.ORIG;
-        }
-        if( op.equals( "CON" )){
-            return Op.CON;
-        }
-        if( op.equals( "ALF" )){
-            return Op.ALF;
-        }
-        if( op.equals( "END" )){
-            return Op.END;
-        }
-        return Op.NOPE;
+        // assemble the instruction at cheese.pc here
+        int backup = pc;
+        pc = cheese.pc;
+        asm( cheese.op, adr );
+        pc = backup;
     }
 ////////////////////////////////////////////////////////////////
     void asmfr( Snapshot snapshot ){
         Address adr = snapshot.adr;
         String a = adr.a;
-        final var p = checkLab( a );
-        if( p == LABERR ){
-            // check if is in the table
-            if( tab.containsKey( a ) == false ){
-                // replace with 0
-                adr.a = "0";
-            }
-        } else {
+        Pair<Character,Integer> p;
+        try{ // dF
+            p = checkLab( a );
             int d = p.y;
-            final var thelab = lab[ d ];
-            // Ok no need for binary search, thelab should be
-            // sorted.
-            int m = -1; // first number in thelab bigger than
-                        // snapshot.pc
+            var thelab = lab[ d ];
+            // thelab should be sorted, but no need for binary
+            // search, m is the first number in thelab bigger
+            // than snapshot.pc.
+            int m = -1;
             int key = snapshot.pc;
             for( int n: thelab ){
                 if( n > key ){
@@ -574,14 +490,13 @@ class Parser { /////////////////////////////////////////////////
                 throw new Error( "label not found" );
             }
             adr.a = String.valueOf( m );
+        } catch( RuntimeException e ){ // normal symbol
+            // Not defined in the LOC field.
+            if( !tab.containsKey( a )) adr.a = "0";
         }
         int backup = pc;
         pc = snapshot.pc;
-        try {
-            asm( snapshot.op, adr );
-        } catch( Exception e ){
-            throw new Error( "Future Reference Assembly" );
-        }
+        asm( snapshot.op, adr );
         pc = backup;
     }
 ////////////////////////////////////////////////////////////////
@@ -592,33 +507,101 @@ class Parser { /////////////////////////////////////////////////
         for( int j = 0; j < DIGITS; j++ ){
             Collections.sort( lab[ j ]);
         }
-        for( final Snapshot snapshot: timeshift ) {
-            if( snapshot.futureRef == false ) {
-                asmli( snapshot );
-            } else {
+        for( Snapshot snapshot: timeshift ){
+            if( snapshot.futureRef ){
                 asmfr( snapshot );
+            } else {
+                asmli( snapshot );
             }
         }
     }
 ////////////////////////////////////////////////////////////////
     public static void main( String[] args ) throws Exception {
         Parser parser = new Parser();
-        if( false ){
+        if( true ){
+            try {
+                parser.firstPass( "src.mixal" );
+                parser.secondPass();
+                out.println( parser );
+                parser.vm.dumpMemory( 0, 10 );
+            } catch( Exception e ){
+                out.println( e );
+            }
         } else {
-            parser.firstPass( "./src.mixal" );
+        }
+    }
+}
+//////////////  ////////////////////////////////////////////////
+class Walue { // W-Value
+    static final Pattern COMP = Pattern.compile
+        ( "^([^()]+)+(\\((.+)\\))*$" ); // E(F)
+    static final Pattern SPLITPAT = Pattern.compile
+        ( "([^,]+),*" ); // comp1,comp2,..,compN
+    //
+    Parser parser;
+    Walue( Parser parser ){
+        this.parser = parser;
+    }
+    ////////////////////////////////////////////////////////////////////
+    // Check Component E1(F1),[E2(F2)],...,EN(FN)
+    static Pair<String,String> checkcomp( String comp ){
+        Matcher mat = COMP.matcher( comp );
+        if( !mat.find()) throw new Error( "comp[haha]not[good]" );
+        return new Pair<>( mat.group(1),
+                           mat.group(3) == null ? "0:5" : mat.group(3));
+    }
+    // E1(F1),E2(F2),...,EN(FN)
+    static ArrayList<Pair<String,String>> split( String walue ){
+        var mat = SPLITPAT.matcher( walue );
+        var ls = new ArrayList<Pair<String,String>>();
+        while( mat.find()) {
+            ls.add( checkcomp( mat.group(1)));
+        }
+        return ls;
+    }
+    ////////////////////////////////////////////////////////////
+    static boolean checkField( int F ){
+        if( F < 0 ) return false; 
+        // F = 8L + R
+        if( F/8 > Word.BYTES ||
+            F%8 > Word.BYTES ) return false;
+        return true;
+    }
+    ////////////////////////////////////////////////////////////
+    Word ewal( String walue ){
+        Word w = new Word();
+        try {
+            for( var comp: split( walue )){
+                // Here comp is an <E,F> pair.
+                int F = parser.eval( new Espresso( comp.y ).Analyze());
+                if(! checkField( F )){
+                    throw new Error( "Not valid field" );
+                }
+                int E = parser.eval( new Espresso( comp.x ).Analyze());
+                w.setvalue( F, E ); 
+            }
+        } catch( Exception e ) {
+            throw new Error( "Alarm!" );
+        }
+        return w;
+    }
+    ////////////////////////////////////////////////////////////
+    public static void main( String[] args ) throws Exception {
+        Parser parser = new Parser();
+        parser.tab.put( "HAHA", 5 );
+        parser.tab.put( "WTF2", 4 );
+        parser.pc = 7;
+        parser.lab[2].add( 4 );
+        try {
+            parser.asm( "NOP", new Address( args[0] ));
             out.println( parser );
-            parser.vm.dumpMemory( 0, 10 );
-            parser.secondPass();
-            parser.vm.dumpMemory( 0, 10 );
+        } catch( Exception e ){
+            out.println( e );
         }
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - Why not create class Walue?
-//      - figure evalWalue( "-200/5(2:4)" ) case
-//      - =200/5(2:4)=,2(0:3) will cause problems in Address
-//        constructor, that means isLiteral, and possibly
-//        isFutureRef should be called in the Address cons.
-//      - make fst, snd pass, debug a little and push to git
-//      - it's not very clear to me if local labels are chosen
-//        with respect of program counter or source line?
+// log: - Create Future Reference RuntimeException           []
+//      - allow spaces to appear in the ska.adr              []
+//      - dump litab as well                                 []
+
