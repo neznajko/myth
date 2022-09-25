@@ -285,6 +285,7 @@ class VM { // Virtual Machine
     static final int LESS    = -1;
     static final int EQUAL   = 0;
     static final int GREATER = 1;    
+    static final int NOOFDEV = 21; // number of devices
     Word memory[] = new Word[ MEMSIZ ]; // per sé( wtf? )
     int start = 0; // these should be set by the Parser
     int end   = 5; // vhere to insert literals
@@ -296,6 +297,7 @@ class VM { // Virtual Machine
     int comparizonIndykate;
     int pc; // the program counter
     Operator op;
+    Device dev[] = new Device[ NOOFDEV ];
     VM() { // Constructor
         for( int j = 0; j < MEMSIZ; j++ ){
             memory[j] = new Word( false, 0 );
@@ -310,6 +312,7 @@ class VM { // Virtual Machine
         comparizonIndykate = EQUAL;
         pc = 0;
         op = new Operator( this );
+        dev[18] = new Device( 18, "printer", 24, this );
     }
     ////////////////////////////////////////////////////////////
     // Dump memory in the address interval [ lo, hi ), for dumping
@@ -340,4 +343,5 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////
-// log:
+// log: -There is a circular dependency Operator, Device v Vm.
+// It is the right time to show your Design Genius!

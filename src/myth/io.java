@@ -43,7 +43,6 @@ class Device {
         int next_ptr = cure_ptr + block_size;
         try {
             String block = content.substring( cure_ptr, next_ptr );
-            out.println( block );
             load_memory( block, adr );
         } catch( Throwable t ){
             throw new Error( "<<< EOF" );

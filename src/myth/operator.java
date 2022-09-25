@@ -1010,12 +1010,21 @@ class Operator {
     }
     class NOP implements Service {
         public void exec( int adr, int fld ){
-            // Muahaha
         }
     }
     class HLT implements Service { // Alarm!
         public void exec( int adr, int fld ) {
             throw new KeineBewegung();
+        }
+    }
+    ////////////////////////////////////////////////////////////
+    class IN implements Service {
+        public void exec( int adr, int fld ) {
+            var dev = vm.dev[ fld ];
+            if( dev == null ){
+                throw new Error( "Device not found." );
+            }
+            dev.in( adr );
         }
     }
     ////////////////////////////////////////////////////////////
@@ -1155,15 +1164,16 @@ class Operator {
                                               new J6NZ(),
                                               new J6NP() ));
         // Lots of Copy and Paste!
-        serv[ 6 ] = new ArrayList<>( asList( new SLA(),
-                                             new SRA(),
-                                             new SLAX(),
-                                             new SRAX(),
-                                             new SLC(),
-                                             new SRC() ));
-        serv[ 7 ] = new ArrayList<>( asList( new MOVE() ));
-        serv[ 0 ] = new ArrayList<>( asList( new NOP() ));
-        serv[ 5 ] = new ArrayList<>( asList( new HLT() ));
+        serv[  6 ] = new ArrayList<>( asList( new SLA(),
+                                              new SRA(),
+                                              new SLAX(),
+                                              new SRAX(),
+                                              new SLC(),
+                                              new SRC() ));
+        serv[  7 ] = new ArrayList<>( asList( new MOVE() ));
+        serv[  0 ] = new ArrayList<>( asList( new NOP() ));
+        serv[  5 ] = new ArrayList<>( asList( new HLT() ));
+        serv[ 36 ] = new ArrayList<>( asList( new IN() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -1184,20 +1194,8 @@ class Operator {
         var vm = new VM();
         var op = new Operator( vm );
         // testing...
-        int adr = 1;
-        int fld = 4;
-        int code = 7;
-        vm.rI[ 0 ].setvalue( 5, 6 );
-        vm.memory[ 1 ].setvalue( 5, 1 );
-        vm.memory[ 2 ].setvalue( 5, 2 );
-        vm.memory[ 3 ].setvalue( 5, 3 );
-        vm.memory[ 4 ].setvalue( 5, 4 );
-        vm.dumpMemory( 0, 10 );
-        //
-        op.exec( adr, fld, code );
-        //
-        vm.dumpMemory( 0, 10 );
-        //
+        op.exec( 0, 18, 36 );
+        vm.dumpMemory( 0, 25 );
     }
 }
 ////////////////////////////////////////////////////////////////
