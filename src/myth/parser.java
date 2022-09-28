@@ -74,6 +74,7 @@ class Parser { /////////////////////////////////////////////////
     static final Pattern LABPAT = Pattern.compile( "^\\d[HBF]$" );
     //
     static HashMap<Character,Integer> charmap;
+    static HashMap<Integer,Character> mapchar;
     static {
         charmap = new HashMap<>();
         charmap.put(  ' ',  0 );
@@ -132,6 +133,10 @@ class Parser { /////////////////////////////////////////////////
         charmap.put(  ';', 53 );
         charmap.put(  ':', 54 );
         charmap.put( '\'', 55 );
+        mapchar = new HashMap<>();
+        for( var entry : charmap.entrySet()) {
+            mapchar.put( entry.getValue(), entry.getKey());
+        }
     }
     //
     // This is the famous Symbol Table.
@@ -387,6 +392,14 @@ class Parser { /////////////////////////////////////////////////
         return w;
     }
     ////////////////////////////////////////////////////////////
+    static String decode( Word w ){
+        char c[] = new char[ Word.BYTES ];
+        for( int j = 1; j <= Word.BYTES; j++ ){
+            c[j - 1] = mapchar.get( w.getfld( j, j ));
+        }
+        return new String(c);
+    }
+    ////////////////////////////////////////////////////////////
     void firstPass( String fileName ) throws Exception {
         Skanner ska = new Skanner( fileName );
         while( ska.getnext()) {
@@ -520,10 +533,8 @@ class Parser { /////////////////////////////////////////////////
         Parser parser = new Parser();
         if( true ){
             try {
-                parser.firstPass( "src.mixal" );
-                parser.secondPass();
-                out.println( parser );
-                parser.vm.dumpMemory( 0, 10 );
+                Word w = parser.walue.ewal( "1(1:1),2(2:2),3(3:3),4(4:4),5(5:5)" );
+                out.println( decode( w ));
             } catch( Exception e ){
                 out.println( e );
             }

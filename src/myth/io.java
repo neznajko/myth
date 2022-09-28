@@ -3,27 +3,32 @@ package myth;
 ////////////////////////////////////////////////////////////////
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.StandardOpenOption;
+////////////////////////////////////////////////////////////////
+import java.util.ArrayList;
 ////////////////////////////////////////////////////////////////
 import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 class Device {
     static final String BASEDIR = "./dev/";
-    final int    unit;
-    final String fileName;      
-    final int    block_size;
+    int    unit;
+    Path   filePath;
+    int    noof_words;
+    int    block_size;
     VM     vm;
     String content;
     int    cure_ptr = 0; // current pointer
     //
-    Device( int unit, String fileName, int block_size, VM vm ){
+    Device( int unit, String fileName, int noof_words, VM vm ){
         this.unit = unit;
-        this.fileName = fileName;
-        this.block_size = block_size * Word.BYTES;
+        this.filePath = Path.of( BASEDIR + fileName );
+        this.noof_words = noof_words;
+        this.block_size = noof_words * Word.BYTES;
         this.vm = vm;
     }
     void load_content() {
         try {
-            Path filePath = Path.of( BASEDIR + fileName );
             content = Files.readString( filePath )
                            .replaceAll( "\\R", "" ); // new lines
         } catch( Exception e ){
@@ -49,13 +54,34 @@ class Device {
         }
         cure_ptr = next_ptr;
     }
+    void out( int adr ){
+        var lines = new ArrayList<String>();
+        for( int i = 0; i < 2; i++ ){
+            var b = new StringBuilder();
+            for( int j = 0; j < noof_words/2; j++ ){
+                b.append( Parser.decode( vm.memory[ adr++ ]));
+            }
+            lines.add( b.toString());
+        }
+        try {
+            Files.write( filePath, lines,
+                         StandardCharsets.UTF_8,
+                         StandardOpenOption.APPEND );
+        } catch( Throwable t ){
+            throw new Error( "#8(" );
+        }
+    }
     static public void main( String args[] ){
         VM vm = new VM();
         Device line_printer = new Device( 18, "printer", 24, vm );
-        line_printer.in( 0 );
-        vm.dumpMemory( 0, 25 );
+        Parser parser = new Parser();
+        vm.memory[0] = parser.walue.ewal( "31(4:4),4(5:5)" );
+        vm.memory[23] = parser.walue.ewal( "14(1:1),28(3:3)" );
+        line_printer.out( 0 );
+        vm.memory[0] = parser.walue.ewal( "2(1:1),31(4:4),4(5:5)" );
+        line_printer.out( 0 );        
     }
 }
 ////////////////////////////////////////////////////////////////
-// log:
+// log: 
 //

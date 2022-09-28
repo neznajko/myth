@@ -1027,6 +1027,15 @@ class Operator {
             dev.in( adr );
         }
     }
+    class OUT implements Service {
+        public void exec( int adr, int fld ) {
+            var dev = vm.dev[ fld ];
+            if( dev == null ){
+                throw new Error( "Device not found." );
+            }
+            dev.out( adr );
+        }
+    }
     ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
     // is to forget about the serv variable and use switch state-
@@ -1174,6 +1183,7 @@ class Operator {
         serv[  0 ] = new ArrayList<>( asList( new NOP() ));
         serv[  5 ] = new ArrayList<>( asList( new HLT() ));
         serv[ 36 ] = new ArrayList<>( asList( new IN() ));
+        serv[ 37 ] = new ArrayList<>( asList( new OUT() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -1193,9 +1203,11 @@ class Operator {
     public static void main( String[] args ){
         var vm = new VM();
         var op = new Operator( vm );
+        var parser = new Parser();
         // testing...
-        op.exec( 0, 18, 36 );
-        vm.dumpMemory( 0, 25 );
+        vm.memory[0] = parser.walue.ewal( "15(2:2),32(4:4),4(5:5)" );
+        vm.memory[23] = parser.walue.ewal( "14(1:1),28(3:3)" );
+        op.exec( 0, 18, 37 );
     }
 }
 ////////////////////////////////////////////////////////////////
