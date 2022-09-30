@@ -1009,17 +1009,16 @@ class Operator {
         }
     }
     class NOP implements Service {
-        public void exec( int adr, int fld ){
-        }
+        public void exec( int adr, int fld ){}
     }
     class HLT implements Service { // Alarm!
-        public void exec( int adr, int fld ) {
+        public void exec( int adr, int fld ){
             throw new KeineBewegung();
         }
     }
     ////////////////////////////////////////////////////////////
     class IN implements Service {
-        public void exec( int adr, int fld ) {
+        public void exec( int adr, int fld ){
             var dev = vm.dev[ fld ];
             if( dev == null ){
                 throw new Error( "Device not found." );
@@ -1028,13 +1027,28 @@ class Operator {
         }
     }
     class OUT implements Service {
-        public void exec( int adr, int fld ) {
+        public void exec( int adr, int fld ){
             var dev = vm.dev[ fld ];
             if( dev == null ){
                 throw new Error( "Device not found." );
             }
             dev.out( adr );
         }
+    }
+    class IOC implements Service {
+        public void exec( int adr, int fld ){
+            var dev = vm.dev[ fld ];
+            if( dev == null ){
+                throw new Error( "Device not found." );
+            }
+            dev.perform_rewind();
+        }
+    }
+    class JRED implements Service {
+        public void exec( int adr, int fld ){}
+    }
+    class JBUS implements Service {
+        public void exec( int adr, int fld ){}
     }
     ////////////////////////////////////////////////////////////
     // There are operations with same C and different F, one way
@@ -1184,6 +1198,9 @@ class Operator {
         serv[  5 ] = new ArrayList<>( asList( new HLT() ));
         serv[ 36 ] = new ArrayList<>( asList( new IN() ));
         serv[ 37 ] = new ArrayList<>( asList( new OUT() ));
+        serv[ 35 ] = new ArrayList<>( asList( new IOC() ));
+        serv[ 38 ] = new ArrayList<>( asList( new JRED() ));
+        serv[ 34 ] = new ArrayList<>( asList( new JBUS() ));
     }
     void exec( int adr, int fld, int code ){
         if( serv[ code ].size() == 1 ){
@@ -1208,6 +1225,7 @@ class Operator {
         vm.memory[0] = parser.walue.ewal( "15(2:2),32(4:4),4(5:5)" );
         vm.memory[23] = parser.walue.ewal( "14(1:1),28(3:3)" );
         op.exec( 0, 18, 37 );
+        op.exec( 0, 18, 35 );
     }
 }
 ////////////////////////////////////////////////////////////////

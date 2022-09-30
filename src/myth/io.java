@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardOpenOption;
+import java.nio.channels.FileChannel;
 ////////////////////////////////////////////////////////////////
 import java.util.ArrayList;
 ////////////////////////////////////////////////////////////////
@@ -12,13 +13,14 @@ import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 class Device {
     static final String BASEDIR = "./dev/";
-    int    unit;
-    Path   filePath;
-    int    noof_words;
-    int    block_size;
-    VM     vm;
-    String content;
-    int    cure_ptr = 0; // current pointer
+    int        unit;
+    Path       filePath;
+    int        noof_words;
+    int        block_size;
+    VM         vm;
+    String     content;
+    int        cure_ptr = 0; // current pointer
+    Controller ctrl;
     //
     Device( int unit, String fileName, int noof_words, VM vm ){
         this.unit = unit;
@@ -26,6 +28,12 @@ class Device {
         this.noof_words = noof_words;
         this.block_size = noof_words * Word.BYTES;
         this.vm = vm;
+    }
+    void set_controller( Controller ctrl ){
+        this.ctrl = ctrl;
+    }
+    void perform_rewind() {
+        ctrl.rewind( filePath );
     }
     void load_content() {
         try {
@@ -74,12 +82,31 @@ class Device {
     static public void main( String args[] ){
         VM vm = new VM();
         Device line_printer = new Device( 18, "printer", 24, vm );
+        line_printer.set_controller( new Clear());
         Parser parser = new Parser();
         vm.memory[0] = parser.walue.ewal( "31(4:4),4(5:5)" );
         vm.memory[23] = parser.walue.ewal( "14(1:1),28(3:3)" );
         line_printer.out( 0 );
         vm.memory[0] = parser.walue.ewal( "2(1:1),31(4:4),4(5:5)" );
-        line_printer.out( 0 );        
+        line_printer.perform_rewind();
+        line_printer.out( 0 );
+    }
+}
+////////////////////////////////////////////////////////////////
+interface Controller {
+    void rewind( Path filePath );
+}
+class Clear implements Controller {
+    public void rewind( Path filePath ){
+        try {
+            FileChannel.open( filePath, StandardOpenOption.WRITE)
+                       .truncate(0)
+                       .close();
+        } catch( Throwable t ){
+            out.println( "Q:'");
+        }
+    }
+    static public void main( String args[] ){
     }
 }
 ////////////////////////////////////////////////////////////////

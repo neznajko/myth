@@ -313,6 +313,7 @@ class VM { // Virtual Machine
         pc = 0;
         op = new Operator( this );
         dev[18] = new Device( 18, "printer", 24, this );
+        dev[18].set_controller( new Clear());
     }
     ////////////////////////////////////////////////////////////
     // Dump memory in the address interval [ lo, hi ), for dumping
