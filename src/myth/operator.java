@@ -1011,6 +1011,49 @@ class Operator {
     class NOP implements Service {
         public void exec( int adr, int fld ){}
     }
+    ////////////////////////////////////////////////////////////
+    // A | 63 | 15 | 10 | 21 | 35 | X | 51 | 02 | 35 | 47 | 18 |
+    // Here we take second digits from each byte and form number
+    // placed in rA, there might be overflow here.
+    // A |             3501512578 |
+    class NUM implements Service {
+        long result;
+        long base;
+        void decode( Word reg ){
+            for( int j = Word.BYTES; j > 0; j--) {
+                int b = reg.getfld( j, j );
+                result += (b%10)*base;
+                base *= 10;
+            }
+        }
+        public void exec( int adr, int fld ){
+            result = 0;
+            base = 1;
+            decode( vm.rX);
+            decode( vm.rA);
+            if( Word.overflow( result)){
+                vm.overflowToggle = true;
+            }
+            vm.rA.bufr = Word.WORD_MASK & result;
+        }
+    }
+    // This is the opposite of NUM.
+    class CHAR implements Service {
+        static final int NULL_CODE = 30;
+        long bufr;
+        void encode( Word reg ){
+            for( int j = Word.BYTES; j > 0; j--) {
+                int code = NULL_CODE + (int) bufr%10;
+                reg.setvalue( j, j, code );
+                bufr /= 10;
+            }
+        }
+        public void exec( int adr, int fld ){
+            bufr = vm.rA.bufr;
+            encode( vm.rX );
+            encode( vm.rA );
+        }
+    }
     class HLT implements Service { // Alarm!
         public void exec( int adr, int fld ){
             throw new KeineBewegung();
@@ -1195,7 +1238,9 @@ class Operator {
                                               new SRC() ));
         serv[  7 ] = new ArrayList<>( asList( new MOVE() ));
         serv[  0 ] = new ArrayList<>( asList( new NOP() ));
-        serv[  5 ] = new ArrayList<>( asList( new HLT() ));
+        serv[  5 ] = new ArrayList<>( asList( new NUM(),
+                                              new CHAR(),
+                                              new HLT() ));
         serv[ 36 ] = new ArrayList<>( asList( new IN() ));
         serv[ 37 ] = new ArrayList<>( asList( new OUT() ));
         serv[ 35 ] = new ArrayList<>( asList( new IOC() ));
@@ -1222,10 +1267,12 @@ class Operator {
         var op = new Operator( vm );
         var parser = new Parser();
         // testing...
-        vm.memory[0] = parser.walue.ewal( "15(2:2),32(4:4),4(5:5)" );
-        vm.memory[23] = parser.walue.ewal( "14(1:1),28(3:3)" );
-        op.exec( 0, 18, 37 );
-        op.exec( 0, 18, 35 );
+        vm.rA = new Word( 123456789 );
+        out.println( vm.rA );
+        out.println( vm.rX );
+        op.exec( 0, 1, 5 );
+        out.println( vm.rA );
+        out.println( vm.rX );
     }
 }
 ////////////////////////////////////////////////////////////////
