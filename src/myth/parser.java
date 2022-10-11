@@ -529,12 +529,21 @@ class Parser { /////////////////////////////////////////////////
         }
     }
 ////////////////////////////////////////////////////////////////
+    void compile( String fileName ){
+        try{ 
+            firstPass( fileName );
+        } catch( Throwable t ){
+            out.println( t.getMessage() );
+            return;
+        }
+        secondPass();
+    }
+////////////////////////////////////////////////////////////////    
     public static void main( String[] args ) throws Exception {
         Parser parser = new Parser();
         if( true ){
             try {
-                Word w = parser.walue.ewal( "1(1:1),2(2:2),3(3:3),4(4:4),5(5:5)" );
-                out.println( decode( w ));
+                parser.compile( "src.mixal" );
             } catch( Exception e ){
                 out.println( e );
             }
@@ -612,7 +621,6 @@ class Walue { // W-Value
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - Create Future Reference RuntimeException           []
-//      - allow spaces to appear in the ska.adr              []
-//      - dump litab as well                                 []
-
+// log: - Set vm.pc to START address which is the address of the
+//        END instruction, remove vm.start []
+//      - do pc need to be backed up at the second pass? []

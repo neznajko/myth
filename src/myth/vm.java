@@ -344,5 +344,4 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: -There is a circular dependency Operator, Device v Vm.
-// It is the right time to show your Design Genius!
+// log:

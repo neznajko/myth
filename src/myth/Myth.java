@@ -163,7 +163,7 @@ class Skanner {
                 sors.close();
                 break;
             }
-            if( isRemark( line ) || line.trim().isEmpty()){
+            if( isRemark( line ) || line.trim().isEmpty()) {
                 continue;
             }
             Decompose( line );
@@ -361,4 +361,8 @@ public class Myth {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: -Rethink the Token class, there are lot of repetitions.
+// log: - There are lot of repetitions in the Token class    []
+//      - Create Future Reference RuntimeException           []
+//      - allow spaces to appear in the ska.adr              []
+//      - dump litab as well                                 []
+
