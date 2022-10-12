@@ -18,14 +18,14 @@ writing the GUI and the Interpreter.
 Ok it's kind of working here is an example program( src.mixal):
 
 ```mixal
-HAHA	EQU	    2
-	    ORIG    10
-	    CON	    6
-STAAT	JMP	    1F
-BOOM	NOP
-1H	    SUB	    BOOM-HAHA
-2H	    ADD	    =10= * o_o
-	    END	    STAAT
+HAHA    EQU     2
+        ORIG    10
+        CON     6
+STAAT   JMP     1F
+BOOM    NOP
+1H      SUB     BOOM-HAHA
+2H      ADD     =10= * o_o
+        END     STAAT
 * log:
 ```
 
