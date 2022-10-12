@@ -334,6 +334,10 @@ class VM { // Virtual Machine
             ++pc;
         }
     }
+    void go() {
+        pc = start;
+        cpu();
+    }
     public static void main( String[] args ){
         VM vm = new VM();
         var word = vm.memory[5];

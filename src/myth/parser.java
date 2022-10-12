@@ -434,6 +434,7 @@ class Parser { /////////////////////////////////////////////////
                 vm.memory[ pc ] = encode( ska.adr );
                 break;
             case END:
+                vm.start = ( int )walue.ewal( ska.adr ).getval();
                 vm.end = pc;
                 break;
             default: throw new Error( "8/" );
@@ -474,10 +475,8 @@ class Parser { /////////////////////////////////////////////////
             adr.a = a;
         }
         // assemble the instruction at cheese.pc here
-        int backup = pc;
         pc = cheese.pc;
         asm( cheese.op, adr );
-        pc = backup;
     }
 ////////////////////////////////////////////////////////////////
     void asmfr( Snapshot snapshot ){
@@ -507,10 +506,8 @@ class Parser { /////////////////////////////////////////////////
             // Not defined in the LOC field.
             if( !tab.containsKey( a )) adr.a = "0";
         }
-        int backup = pc;
         pc = snapshot.pc;
         asm( snapshot.op, adr );
-        pc = backup;
     }
 ////////////////////////////////////////////////////////////////
     void secondPass() {
@@ -520,6 +517,7 @@ class Parser { /////////////////////////////////////////////////
         for( int j = 0; j < DIGITS; j++ ){
             Collections.sort( lab[ j ]);
         }
+        int backup = vm.end;
         for( Snapshot snapshot: timeshift ){
             if( snapshot.futureRef ){
                 asmfr( snapshot );
@@ -527,6 +525,7 @@ class Parser { /////////////////////////////////////////////////
                 asmli( snapshot );
             }
         }
+        vm.end = backup;
     }
 ////////////////////////////////////////////////////////////////
     void compile( String fileName ){
@@ -541,13 +540,13 @@ class Parser { /////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////    
     public static void main( String[] args ) throws Exception {
         Parser parser = new Parser();
-        if( true ){
-            try {
-                parser.compile( "src.mixal" );
-            } catch( Exception e ){
-                out.println( e );
-            }
-        } else {
+        try {
+            parser.compile( "src.mixal" );
+            parser.vm.dumpMemory( 8, 18 );
+            parser.vm.go();
+            out.println( "rA: " + parser.vm.rA );
+        } catch( Exception e ){
+            out.println( e );
         }
     }
 }
@@ -621,6 +620,4 @@ class Walue { // W-Value
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - Set vm.pc to START address which is the address of the
-//        END instruction, remove vm.start []
-//      - do pc need to be backed up at the second pass? []
+// log:
