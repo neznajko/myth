@@ -29,7 +29,7 @@ BOOM    NOP
 * log:
 ```
 
-This is java code to compile and run the program:
+This is the java code to compile and run the program:
 
 ```java
 ////////////////////////////////////////////////////////////////    
