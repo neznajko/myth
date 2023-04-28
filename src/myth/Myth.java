@@ -72,7 +72,7 @@ class Espresso {
     }
     ////////////////////////////////////////////////////////////
     // getOpera: -> Token <- int( j )
-    // j must be over non digit or letter
+    // j must be over non ( digit or letter )
     Token getOpera( int j ){ //////////////////////////////////_
         char c = coffee.charAt( j );
         if( c == '/' ){
@@ -103,24 +103,25 @@ class Espresso {
     ArrayList<Token> Analyze(){               
         var ingredients = new ArrayList<Token>();
         int j;
-        for( int i = 0; i < coffee.length(); i = j ){
+        for( int i = 0;; i = j ){
             j = atOpera( i );
             if( j > i ){
                 String a = coffee.substring( i, j );
                 ingredients.add( getSamba( a ));
             }
+            if( j == coffee.length() - 1 ) break; // Guard
             Token operator = getOpera( j );
             ingredients.add( operator );
             j += operator.value.length();
         }
-        // Discard the Guard Token
-        ingredients.remove( ingredients.size() - 1 );
         return ingredients;
     }
     static public void main( String[] args ){
         try {
-            out.println( new Espresso( "-15:WTF2/4+HAHA+10" )
-                         .Analyze());
+            String coffee = ( args.length > 0 ?
+                              coffee = args[ 0 ] :
+                              "-15:WTF2/4+HAHA+10" );
+            out.println( new Espresso( coffee ).Analyze());
         } catch( Error e ){
             out.println( e );
         }
