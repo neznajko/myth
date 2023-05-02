@@ -133,6 +133,7 @@ class Espresso {
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 class Skanner {
+//LOC OP ADR REMRK
     static final String GUARD = "   remark"; // f0r op and adr
     String loc;
     String op;
@@ -146,8 +147,8 @@ class Skanner {
     Skanner( String fpath ){
         try {
             sors = new BufferedReader( new FileReader( fpath ));
-        } catch ( FileNotFoundException e ){
-            throw new Error( e.getMessage() );
+        } catch( FileNotFoundException e ){
+            throw new Error( e.getMessage());
         }
     }
     void Decompose( String line ){
@@ -164,7 +165,7 @@ class Skanner {
                 sors.close();
                 break;
             }
-            if( isRemark( line ) || line.trim().isEmpty()) {
+            if( isRemark( line ) || line.trim().isEmpty()){
                 continue;
             }
             Decompose( line );
@@ -173,13 +174,13 @@ class Skanner {
         return false;
     }
     @Override
-    public String toString() {
+    public String toString(){
         return loc + "|" + op + "|" + adr;
     }
     public static void main( String args[] ){
         try {
             Skanner ska = new Skanner( args[0] );
-            while( ska.getnext()) {
+            while( ska.getnext()){
                 out.println( ska );
             }
         } catch( Throwable t ){
@@ -204,7 +205,7 @@ class Pair<X,Y> {
 class Instruction {
     static HashMap<String,Pair<Integer,Integer>> map;
     static {
-        map = new HashMap<>();
+        map = new HashMap<>(); //     C  F
         map.put(  "LDA", new Pair<>(  8, 5 )); // Loading
         map.put(  "LDX", new Pair<>( 15, 5 ));
         map.put(  "LD1", new Pair<>(  9, 5 ));
@@ -355,15 +356,13 @@ class Instruction {
     }
 }
 ////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
 public class Myth {
     public static void main( String[] args ){
         out.println( "Myth" );
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - There are lot of repetitions in the Token class    []
-//      - Create Future Reference RuntimeException           []
+// log: - Create Future Reference RuntimeException           []
 //      - allow spaces to appear in the ska.adr              []
 //      - dump litab as well                                 []
 

@@ -16,7 +16,7 @@ import static java.lang.System.out;
 // for that reason are strings.
 class Address { // a,i(f)
     static final Pattern PATTERN = Pattern.compile
-        ( "^(=.+=|[^,()]+)(,([^()])+)*(\\((.+)\\))*$" );
+        ( "^(=.+=|[^,()]+)(,([^()]+))*(\\((.+)\\))*$" );
     String a;
     String i;
     String f; 
