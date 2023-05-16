@@ -134,7 +134,7 @@ class Parser { /////////////////////////////////////////////////
         charmap.put(  ':', 54 );
         charmap.put( '\'', 55 );
         mapchar = new HashMap<>();
-        for( var entry : charmap.entrySet()) {
+        for( var entry: charmap.entrySet()){
             mapchar.put( entry.getValue(), entry.getKey());
         }
     }
@@ -168,7 +168,7 @@ class Parser { /////////////////////////////////////////////////
     // Check if token tok is in the form dB, dH, or dF,
     // where d is 0-9 digit.
     static Pair<Character,Integer> checkLab( String tok ){
-        if( !LABPAT.matcher( tok ).find()) {
+        if( !LABPAT.matcher( tok ).find()){
             throw new RuntimeException( "labpat" );
         }
         return new Pair<>( tok.charAt( 1 ),

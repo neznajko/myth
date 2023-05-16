@@ -348,4 +348,6 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////
-// log:
+// log: - create new branch dev
+//      - make Word.java file and start cleaning the code
+//
