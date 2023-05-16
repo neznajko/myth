@@ -4,7 +4,7 @@ SRCPATH := src/myth
 BINPATH := bin
 COMPILE := javac -d $(BINPATH) -cp $(BINPATH)
 
-.PHONY: all clean parser myth vm
+.PHONY: all clean parser myth vm word
 
 .DEFAULT_GOAL := all
 
@@ -19,6 +19,9 @@ myth:
 
 vm:
 	$(COMPILE) $(SRCPATH)/vm.java
+
+word:
+	$(COMPILE) $(SRCPATH)/word.java
 
 operator:
 	$(COMPILE) $(SRCPATH)/operator.java
