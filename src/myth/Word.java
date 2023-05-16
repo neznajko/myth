@@ -1,39 +1,44 @@
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 package myth;
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 import static java.lang.System.out;
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+// How a Word is implemented? As a 64-bit number, plus boolen
+// sign, to handle overflow and stuff, and the -0 scenario,
+// respectively.
+////////////////////////////////////////////////////////////////
 class Word {
-    static final int BYTES   = 5;
+    static final int BYTES = 5;
     static final int BYTESIZ = 6; // nof bits
-    static final int INTSIZ  = 32;
-    static final long WORD_MASK = 0x000000003fffffffL; // fst 30 bits
+    static final int INTSIZ = 32;
+    static final long WORD_MASK = 0x000000003fffffffL;// 30 bits
     static final long OVERFLOW_MASK = ~WORD_MASK;
-    // L:R = F = 8L + R
+    static final int FIELD_WIDTH = 8; // L:R = F = 8L + R
     static int L( int fld ){
-        return fld / 8;
+        return fld/ FIELD_WIDTH;
     }
     static int R( int fld ){
-        return fld % 8;
+        return fld% FIELD_WIDTH;
     }
     static int F( int left, int ryte ){
-        return 8*left + ryte;
+        return FIELD_WIDTH * left + ryte;
     }
     // Instruction fields
     static final int INSTR_ADR = F( 0, 2 );
     static final int INSTR_IDX = F( 3, 3 );
     static final int INSTR_FLD = F( 4, 4 );
     static final int INSTR_OPC = F( 5, 5 ); // opcode
-    //
+    ////////////////////////////////////////////////////////////
     // fedcba9876543210fedcba9876543210
     // --______``````______``````______
-    //   1     2     3     4     5
-    static int getoff( int byteNumber ){
-        return BYTESIZ*( BYTES - byteNumber );
+    //   1     2     3     4     5      BYTEnumber
+    //   24    18    12    6     0      BYTEoffset
+    static int GetByteOffset( int byteNumber ){
+        return BYTESIZ *( BYTES - byteNumber );
     }
     static long getmask( int left, int ryte ){
-        int loff = getoff( left - 1 );
-        int roff = getoff( ryte );
+        int loff = GetByteOffset( left - 1 );
+        int roff = GetByteOffset( ryte );
         return ~(-1L << loff) & (-1L << roff);
     }
     // modified code from GfG site
@@ -83,7 +88,7 @@ class Word {
     ////////////////////////////////////////////////////////////    
     int getfld( int left, int ryte ){
         long mask = getmask( left, ryte );
-        int val = (int)(( bufr & mask ) >> getoff( ryte ));
+        int val = (int)(( bufr & mask ) >> GetByteOffset( ryte ));
         if( left == 0 && sign ) val = -val;
         return val;
     }
@@ -113,10 +118,10 @@ class Word {
         // clear
         this.bufr &= ~mask;
         // set
-        int off = getoff( ryte );
+        int off = GetByteOffset( ryte );
         // casting to long allows to use the negative bytes,
         // for the SLC command etc.
-        long shifted = ( long )value << getoff( ryte );
+        long shifted = ( long )value << GetByteOffset( ryte );
         this.bufr |= shifted;
     }
     void setvalue( int fld, int value ){
@@ -232,12 +237,13 @@ class Word {
     ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
-        Word w = new Word( -12345 );
-        Word v = new Word( 7891234 );
-        out.println( w );
-        out.println( v );
-        v.copyOf( w );
-        out.println( v );
+        for( int i = 1; i <= 5; i++ ){
+            out.println( Word.GetByteOffset( i ));
+        }
     }                     
 }
 ////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
