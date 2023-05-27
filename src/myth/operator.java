@@ -1003,7 +1003,7 @@ class Operator {
         public void exec( int adr, int fld ){
             int dest = vm.rI[ 0 ].getfld( 5 );
             for(; fld--> 0; dest++, adr++ ){
-                vm.memory[ dest ].copyOf( vm.memory[ adr ] );
+                vm.memory[ dest ].copy( vm.memory[ adr ] );
             }
             vm.rI[ 0 ].setvalue( 5, dest );
         }

@@ -469,7 +469,7 @@ class Parser { /////////////////////////////////////////////////
             adr.a = litab.get( adr.a );
         } else {
             Word w = vm.memory[ vm.end ];
-            w.setword( Long.valueOf( adr.a ));
+            w.setvalue( Long.valueOf( adr.a ));
             String a = String.valueOf( vm.end++ );
             litab.put( adr.a, a );
             adr.a = a;

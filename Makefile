@@ -21,12 +21,12 @@ vm:
 	$(COMPILE) $(SRCPATH)/vm.java
 
 word:
-	$(COMPILE) $(SRCPATH)/word.java
+	$(COMPILE) $(SRCPATH)/Word.java
 
 operator:
 	$(COMPILE) $(SRCPATH)/operator.java
 
 all:
-	$(COMPILE) $(wildcard $(SRCPATH)/*.java)
+	@$(COMPILE) $(wildcard $(SRCPATH)/*.java)
 
 ################################################################
