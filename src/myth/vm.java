@@ -1,8 +1,8 @@
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 package myth;
-////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////_
 import static java.lang.System.out;
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 import java.util.ArrayList;
 ////////////////////////////////////////////////////////////////
 // Ok, now we have a memory with instructions,( and data ) first
@@ -11,12 +11,12 @@ class InsWord { // Instruction Word
     int adr;
     int idx;
     int fld;
-    int cde;
+    int opc;
     InsWord( final Word w ){
-        adr = w.getfld( 0, 2 );
-        idx = w.getfld( 3, 3 );
-        fld = w.getfld( 4, 4 );
-        cde = w.getfld( 5, 5 );
+        adr = w.getfld( Word.INSTR_ADR );
+        idx = w.getfld( Word.INSTR_IDX );
+        fld = w.getfld( Word.INSTR_FLD );
+        opc = w.getfld( Word.INSTR_OPC );
     }
     @Override
     public String toString() {
@@ -24,21 +24,15 @@ class InsWord { // Instruction Word
                 adr + "," +
                 idx + "," +
                 fld + "," +
-                cde + ")" );
+                opc + ")" );
     }
 }
 ////////////////////////////////////////////////////////////////
-// +-----+-----+-----+-----+-----+-----+
-// |        A        |  i  |  f  |  C  |
-// |                 |     |     |     |
+// +-----+-----+-----+-----+-----+-----+               +---+---+
+// |        A        |  i  |  f  |  C  |               | A | X |
+// |                 |     |     |     |               +---+---+
 // +-----+-----+-----+-----+-----+-----+
 //    0     1     2     3     4     5
-// 
-// +---+---+
-// | A | X |
-// +---+---+
-//
-////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 class VM { // Virtual Machine
     static final int MEMSIZ  = 100; // number of words
@@ -109,6 +103,6 @@ class VM { // Virtual Machine
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: - create new branch dev
-//      - make Word.java file and start cleaning the code
+// log: + create new branch dev
+//      + make Word.java file and start cleaning the code
 //

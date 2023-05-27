@@ -1259,7 +1259,7 @@ class Operator {
         int i = insWord.idx;
         int adr = insWord.adr + vm.rI[i].getfld( 0, 5 );
         int fld = insWord.fld;
-        int code = insWord.cde;
+        int code = insWord.opc;
         exec( adr, fld, code );
     }
     public static void main( String[] args ){

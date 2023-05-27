@@ -531,17 +531,17 @@ class Parser { /////////////////////////////////////////////////
     void compile( String fileName ){
         try{ 
             firstPass( fileName );
+            secondPass();
         } catch( Throwable t ){
             out.println( t.getMessage() );
-            return;
         }
-        secondPass();
     }
-////////////////////////////////////////////////////////////////    
+////////////////////////////////////////////////////////////////
     public static void main( String[] args ) throws Exception {
         Parser parser = new Parser();
         try {
             parser.compile( "src.mixal" );
+            out.println( parser );
             parser.vm.dumpMemory( 8, 18 );
             parser.vm.go();
             out.println( "rA: " + parser.vm.rA );
