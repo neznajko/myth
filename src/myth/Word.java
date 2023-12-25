@@ -23,7 +23,7 @@ class Word {
         return FLD_WIDTH * left + ryte;
     }
     // Instruction fields
-    static final int INSTR_ADR = F( 0, 2 );
+    static final int INSTR_ADR = F( 0, 2 ); // including sign
     static final int INSTR_IDX = F( 3, 3 );
     static final int INSTR_FLD = F( 4, 4 );
     static final int INSTR_OPC = F( 5, 5 ); // opcode
@@ -57,10 +57,8 @@ class Word {
         long mask = GetMask( left, ryte );
         // clear
         this.bufr &= ~mask;
-        // set
-        int off = GetByteOffset( ryte );
         // casting to long allows to use the negative bytes,
-        // for the SLC command etc.
+        // for the SLC command etc.( wtf2 )
         long shifted = ( long )value << GetByteOffset( ryte );
         this.bufr |= shifted;
     }
@@ -140,7 +138,7 @@ class Word {
     void mul( final Word w ) throws Exception {
         long res = getval()* w.getval();
         // Here we have to check if there is an overflow over
-        // the 60th bit.
+        // the 60th bit( c000 0000 0000 0000 ).
         if(( res & 0xc000000000000000L ) > 0 ){
             throw new Exception( "Overflow" );
         }
@@ -184,10 +182,20 @@ class Word {
         // re-establish
         sign = backup;
     }
+    ////////////////////////////////////////////////////////////
+	// Here n can be negative, that is cycle left, this is for
+	// the cycle operations of the extended AX register, with
+	// size 10, for example this is cycle( 2 ):
+	//    ;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;-ee-;
+	//    ;-ee-;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;
+	//    ;----;----;----;----;----;----;----;-aa-;-bb-;-cc-;
+	//    ;-dd-;-ee-;----;----;----;----;----;----;----;----;
+	//        -4   -3   -2   -1    0    1    2    3    4    5
     void cycle( int n ){
-        n %= 2 * BYTES;
+		// Cos we have 10 bytes, take the mod
+        n %= 2*BYTES;
         if( n == 0 ) return;
-        n -= 5;
+        n -= 5; // start from -4th byte
         reverse( -4, 5 );
         reverse( -4, n );
         reverse( n + 1, 5 );
@@ -200,8 +208,12 @@ class Word {
     ///////_////////////////////////////////////////////////////
     public static void main( String[] args ){
         out.println( "Word" );
-        Word w = new Word( true, 0 );
+        Word w = new Word( true, 12345678 );
         out.println( w );
+		w.cycle( 5 );
+		out.println( w );
+		w.cycle( 5 );
+		out.println( w );
         out.println( w.isNull());
     }                     
 }
@@ -209,4 +221,5 @@ class Word {
 ///////////////////////////////////////////////////////////////=
 //////////////////////////////// sed -i 's/old/new/g' src/myth/*
 ///////////////////////////////////////////////////////////////-
-// + make some tests here
+// log: + figure why cycle is working 
+//      - add some comments in the cycle
