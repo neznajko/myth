@@ -13,6 +13,7 @@ import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 class Device {
     static final String BASEDIR = "./dev/";
+	static final int PRINTER = 18;
     int        unit;
     Path       filePath;
     int        noof_words;

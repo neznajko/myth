@@ -71,11 +71,11 @@ class VM { // Virtual Machine
         dev[18].set_controller( new Clear());
     }
     ////////////////////////////////////////////////////////////
-    // Dump memory in the address interval [ lo, hi ), for dumping
-    // all memory use [ 0, MEMSIZ ) range.
+    // Dump memory in the address interval [ lo, hi ), for
+	// dumping all memory use [ 0, MEMSIZ ) range.
     void dumpMemory( int lo, int hi ){
         var b = new StringBuilder();
-        for( int j = lo; j < hi; j++) {
+        for( int j = lo; j < hi; j++ ){
             b.append( String.format( "%04d ", j ));
             b.append( memory[j].toString());
             b.append( "\n" );
@@ -97,12 +97,11 @@ class VM { // Virtual Machine
         VM vm = new VM();
         var word = vm.memory[5];
         word.setvalue( Word.F( 1, 4 ), 15 );
-        vm.dumpMemory(0, 10);
+        vm.dumpMemory( 0, 10 );
         var insWord = new InsWord( word );
         out.println( insWord );
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: + create new branch dev
-//      + make Word.java file and start cleaning the code
+// log: create a static factory for the printer device
 //
