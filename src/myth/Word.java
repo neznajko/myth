@@ -183,16 +183,16 @@ class Word {
         sign = backup;
     }
     ////////////////////////////////////////////////////////////
-	// Here n can be negative, that is cycle left, this is for
-	// the cycle operations of the extended AX register, with
-	// size 10, for example this is cycle( 2 ):
-	//    ;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;-ee-;
-	//    ;-ee-;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;
-	//    ;----;----;----;----;----;----;----;-aa-;-bb-;-cc-;
-	//    ;-dd-;-ee-;----;----;----;----;----;----;----;----;
-	//        -4   -3   -2   -1    0    1    2    3    4    5
+    // Here n can be negative, that is cycle left, this is for
+    // the cycle operations of the extended AX register, with
+    // size 10, for example this is cycle( 2 ):
+    //    ;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;-ee-;
+    //    ;-ee-;----;----;----;----;----;-aa-;-bb-;-cc-;-dd-;
+    //    ;----;----;----;----;----;----;----;-aa-;-bb-;-cc-;
+    //    ;-dd-;-ee-;----;----;----;----;----;----;----;----;
+    //        -4   -3   -2   -1    0    1    2    3    4    5
     void cycle( int n ){
-		// Cos we have 10 bytes, take the mod
+        // Cos we have 10 bytes, take the mod
         n %= 2*BYTES;
         if( n == 0 ) return;
         n -= 5; // start from -4th byte
@@ -210,10 +210,10 @@ class Word {
         out.println( "Word" );
         Word w = new Word( true, 12345678 );
         out.println( w );
-		w.cycle( 5 );
-		out.println( w );
-		w.cycle( 5 );
-		out.println( w );
+        w.cycle( 5 );
+        out.println( w );
+        w.cycle( 5 );
+        out.println( w );
         out.println( w.isNull());
     }                     
 }

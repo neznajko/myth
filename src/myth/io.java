@@ -111,5 +111,5 @@ class Clear implements Controller {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: 
+// log: check other devs make ( unit, vm ) only constructor
 //
