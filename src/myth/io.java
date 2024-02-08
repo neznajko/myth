@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 class Device {
-    static final String BASEDIR = "./dev/";
+    static final String BASEDIR = ".dev/";
 	static final int PRINTER = 18;
     int        unit;
     Path       filePath;
@@ -111,5 +111,5 @@ class Clear implements Controller {
     }
 }
 ////////////////////////////////////////////////////////////////
-// log: check other devs make ( unit, vm ) only constructor
-//
+// log: - check other devs make ( unit, vm ) only constructor
+//      - check the chars enconding try printing 24 words
