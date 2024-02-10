@@ -13,10 +13,14 @@ import static java.lang.System.out;
 ////////////////////////////////////////////////////////////////
 // All evaluations are within Parser because of symbol table and
 // program counter, not to mention the lab arrays, zo all fields
-// for that reason are strings.
+// ( a, i, f ) for that reason are strings( not evaluated ).
 class Address { // a,i(f)
-    static final Pattern PATTERN = Pattern.compile
-        ( "^(=.+=|[^,()]+)(,([^()]+))*(\\((.+)\\))*$" );
+    static final String A = "(^=\\d+=|^[^,()=]+)";
+    static final String I = "(,([^()]+))*";
+    static final String F = "(\\((.+)\\))*$";
+    static final String REGEXP = A + I + F;
+    static final Pattern PATTERN = Pattern.compile( REGEXP );
+    //
     String a;
     String i;
     String f; 
