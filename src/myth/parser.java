@@ -16,8 +16,8 @@ import static java.lang.System.out;
 // ( a, i, f ) for that reason are strings( not evaluated ).
 class Address { // a,i(f)
     static final String A = "(^=\\d+=|^[^,()=]+)";
-    static final String I = "(,([^()]+))*";
-    static final String F = "(\\((.+)\\))*$";
+    static final String I = "(,([^(),]+))?";
+    static final String F = "(\\(([^,()]+)\\))?$";
     static final String REGEXP = A + I + F;
     static final Pattern PATTERN = Pattern.compile( REGEXP );
     //
@@ -28,7 +28,9 @@ class Address { // a,i(f)
     Address( String adr ){
         if( adr.isEmpty()) return;
         Matcher matcher = PATTERN.matcher( adr );
-        if( !matcher.find()) throw new Error( "regex" );
+        if( !matcher.find()){
+            throw new Error( "@8o regexps are fun ho ho ho" );
+        }
         a = matcher.group( 1 );
         i = matcher.group( 3 );
         f = matcher.group( 5 );
@@ -610,17 +612,8 @@ class Walue { // W-Value
     }
     ////////////////////////////////////////////////////////////
     public static void main( String[] args ) throws Exception {
-        Parser parser = new Parser();
-        parser.tab.put( "HAHA", 5 );
-        parser.tab.put( "WTF2", 4 );
-        parser.pc = 7;
-        parser.lab[2].add( 4 );
-        try {
-            parser.asm( "NOP", new Address( args[0] ));
-            out.println( parser );
-        } catch( Exception e ){
-            out.println( e );
-        }
+        Walue walue = new Walue( new Parser());
+        out.println( walue.ewal( "45(1:1),30(2:4)" ));
     }
 }
 ////////////////////////////////////////////////////////////////
