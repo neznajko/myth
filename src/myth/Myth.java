@@ -133,12 +133,14 @@ class Espresso {
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
 class Skanner {
-//LOC OP ADR REMRK
+    //LOC OP ADR REMRK
     static final String GUARD = "   remark"; // f0r op and adr
+    int line_number = 0;
     String loc;
     String op;
     String adr;
     BufferedReader sors;
+    ArrayList<String> file = new ArrayList<>();
     //
     static boolean isRemark( String line ){
         return( line.charAt( 0 ) == '*' );
@@ -165,6 +167,8 @@ class Skanner {
                 sors.close();
                 break;
             }
+            ++line_number;
+            file.add( line );
             if( isRemark( line ) || line.trim().isEmpty()){
                 continue;
             }
@@ -175,7 +179,7 @@ class Skanner {
     }
     @Override
     public String toString(){
-        return loc + "|" + op + "|" + adr;
+        return line_number + ": " + loc + "|" + op + "|" + adr;
     }
     public static void main( String args[] ){
         try {
@@ -183,6 +187,7 @@ class Skanner {
             while( ska.getnext()){
                 out.println( ska );
             }
+            out.println( ska.file );
         } catch( Throwable t ){
             out.println( t.getMessage());
         }
@@ -365,4 +370,4 @@ public class Myth {
 // log: - Create Future Reference RuntimeException           []
 //      - allow spaces to appear in the ska.adr              []
 //      - dump litab as well                                 []
-
+//      - parser <line_numbe - memory_number mapping 

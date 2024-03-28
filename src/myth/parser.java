@@ -1,19 +1,20 @@
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 package myth;
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 import static java.lang.System.out;
-////////////////////////////////////////////////////////////////
-// All evaluations are within Parser because of symbol table and
-// program counter, not to mention the lab arrays, zo all fields
-// ( a, i, f ) for that reason are strings( not evaluated ).
+//////////////////////////////////////////////////////////////
+// All evaluations are within Parser because of symbol table 
+// and program counter, not to mention the lab arrays, zo all
+// fields ( a, i, f ) for that reason are strings
+// ( not evaluated ).
 class Address { // a,i(f)
     static final String A = "(^=\\d+=|^[^,()=]+)";
     static final String I = "(,([^(),]+))?";
@@ -49,15 +50,16 @@ class Address { // a,i(f)
         out.println( adr );
     }
 }
-////////////////////////////////////////////////////////////////
-// After Parser's first pas create list of Snapshots with Future
-// references or Literals for second re-evaluation.
+//////////////////////////////////////////////////////////////
+// After Parser's first pas create list of Snapshots with 
+// Future references or Literals for second re-evaluation.
 class Snapshot {
     int     pc;
     String  op;
     Address adr;
     boolean futureRef; // if false adr's a-part is a literal
-    Snapshot( int pc, String op, Address adr, boolean futureRef ){
+    Snapshot( int pc, String op, Address adr, 
+              boolean futureRef ){
         this.pc        = pc;
         this.op        = op;
         this.adr       = adr;
@@ -65,7 +67,8 @@ class Snapshot {
     }
     @Override
     public String toString() {
-        return pc + ":" + op + "," + adr.toString() + "|" + futureRef;
+        return( pc + ":" + op + "," + adr.toString() + "|" + 
+                futureRef );
     }
     public static void main( String args[] ){
         out.println( new Snapshot( 12,
@@ -74,10 +77,12 @@ class Snapshot {
                                    false ));
     }
 }
-//```` | {@@|  :@@;  }@@             | _ _ | _ _ _ _ _ _ _ _ _ _
-class Parser { /////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//```` | {@@|  :@@;  }@@           | _ _ | _ _ _ _ _ _ _ _ _ _
+class Parser { ///////////////////////////////////////////////
     static final int DIGITS = 10; // local symbol labels.
-    static final Pattern LABPAT = Pattern.compile( "^\\d[HBF]$" );
+    static final Pattern LABPAT = Pattern.compile
+        ( "^\\d[HBF]$" );
     //
     static HashMap<Character,Integer> charmap;
     static HashMap<Integer,Character> mapchar;
@@ -157,7 +162,9 @@ class Parser { /////////////////////////////////////////////////
     // Literal Constant to Address, mapping
     HashMap<String,String> litab;
     Walue walue;
-    ////////////////////////////////////////////////////////////
+    Skanner ska;
+    int[] line_number_map = new int[ VM.MEMSIZ ];
+    //////////////////////////////////////////////////////////
     // Cons
     Parser(){
         tab = new HashMap<>();
@@ -170,7 +177,10 @@ class Parser { /////////////////////////////////////////////////
         litab = new HashMap<>();
         walue = new Walue( this );
     }
-    ////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     // Check if token tok is in the form dB, dH, or dF,
     // where d is 0-9 digit.
     static Pair<Character,Integer> checkLab( String tok ){
@@ -180,10 +190,13 @@ class Parser { /////////////////////////////////////////////////
         return new Pair<>( tok.charAt( 1 ),
                            tok.charAt( 0 ) - '0' );
     }
-    ////////////////////////////////////////////////////////////
-    // Check the correctness of the LOC field. On error throw an 
-    // Error, if it's a local label return its number, otherwise
-    // if it's normal label return -1.
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    // Check the correctness of the LOC field. On error throw
+    // an Error, if it's a local label return its number, 
+    // otherwise if it's normal label return -1.
     static int checkLoc( String loc ){
         var espresso = new Espresso( loc ).Analyze();
         if( espresso.size() != 1 ){
@@ -191,8 +204,8 @@ class Parser { /////////////////////////////////////////////////
         }
         var tok = espresso.get( 0 );
         if( tok.key != Token.Type.SAMBO ){
-            throw new Error
-                ( "If you want to be like Rambo, train Sambo." );
+            throw new Error( "If you want to be like Rambo,"
+                             + " train Sambo." );
         }
         // Check if local symbol, dH, etc.
         try {
@@ -203,7 +216,7 @@ class Parser { /////////////////////////////////////////////////
         }
         throw new Error( "ö_Ò" );
     }
-    ////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     // Print for debugging and stuff.
     @Override
     public String toString() {
@@ -219,7 +232,10 @@ class Parser { /////////////////////////////////////////////////
         b.append( "\nlitab: " + litab.toString());
         return b.toString();
     }
-    ////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     int getTokenValue( Token tok ){
         String value = tok.value;
         switch( tok.key ){
@@ -248,7 +264,10 @@ class Parser { /////////////////////////////////////////////////
         }
         throw new Error( "haha" );
     }
-    ////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
     // coffee:
     // <opera,-><namba,5><opera,+><aster,*><opera,-><sambo,2B>
     int eval( ArrayList<Token> coffee ) throws RuntimeException {
@@ -370,7 +389,7 @@ class Parser { /////////////////////////////////////////////////
             timeshift.add( new Snapshot( pc, op, adr, true ));
             return;
         }
-        ////////////////////////////////////////////////////////        
+        ////////////////////////////////////////////////////////
         // evaluate i,f-parts
         int ival = ( adr.i == null
                      ? 0
@@ -405,9 +424,14 @@ class Parser { /////////////////////////////////////////////////
         }
         return new String(c);
     }
-    ////////////////////////////////////////////////////////////
-    void firstPass( String fileName ) throws Exception {
-        Skanner ska = new Skanner( fileName );
+    ////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
+    void loadFile( String fileName ){
+        ska = new Skanner( fileName );
+    }
+    ////////////////////////////////////////////////////////
+    void firstPass() throws Exception {
         while( ska.getnext()) {
             pc++;
             // LOC
@@ -422,6 +446,7 @@ class Parser { /////////////////////////////////////////////////
             switch( getop( ska.op )) {
             case MIX:
                 asm( ska.op, new Address( ska.adr ));
+                line_number_map[ pc - 1 ] = ska.line_number;
                 break;
             case EQU:
                 w = walue.ewal( ska.adr );
@@ -484,7 +509,7 @@ class Parser { /////////////////////////////////////////////////
         pc = cheese.pc;
         asm( cheese.op, adr );
     }
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
     void asmfr( Snapshot snapshot ){
         Address adr = snapshot.adr;
         String a = adr.a;
@@ -515,7 +540,7 @@ class Parser { /////////////////////////////////////////////////
         pc = snapshot.pc;
         asm( snapshot.op, adr );
     }
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
     void secondPass() {
     // Figure _out first _the literal constants. They must be in
     // the timeshift array flagged as false, use asmli on them.
@@ -533,24 +558,31 @@ class Parser { /////////////////////////////////////////////////
         }
         vm.end = backup;
     }
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
     void compile( String fileName ){
+        loadFile( fileName );
         try{ 
-            firstPass( fileName );
+            firstPass();
             secondPass();
         } catch( Throwable t ){
             out.println( t.getMessage() );
         }
     }
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
     public static void main( String[] args ) throws Exception {
         Parser parser = new Parser();
         try {
             parser.compile( "src.mixal" );
             out.println( parser );
-            parser.vm.dumpMemory( 8, 18 );
-            parser.vm.go();
-            out.println( "rA: " + parser.vm.rA );
+            parser.vm.dumpMemory( 0, 20 );
+            out.println( parser.ska.file );
+            out.println( Arrays.toString( parser.line_number_map ));
         } catch( Exception e ){
             out.println( e );
         }
@@ -567,7 +599,7 @@ class Walue { // W-Value
     Walue( Parser parser ){
         this.parser = parser;
     }
-    ////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
     // Check Component E1(F1),[E2(F2)],...,EN(FN)
     static Pair<String,String> checkcomp( String comp ){
         Matcher mat = COMP.matcher( comp );
@@ -616,5 +648,5 @@ class Walue { // W-Value
         out.println( walue.ewal( "45(1:1),30(2:4)" ));
     }
 }
-////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 // log:
